@@ -1,0 +1,38 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+100	CalMat.f	/^100   format(i4,4(f10.5,1x))$/;"	l	subroutine:CalMat	file:
+100	TDMA.f	/^100   format(1x,3(2(f4.1,1x),2x))$/;"	l	subroutine:TempWrit	file:
+100	TDMA.f	/^100   format(1x,3(2(f5.1,1x),2x))$/;"	l	subroutine:TDMA	file:
+110	TDMA.f	/^110   format(1x,f4.1,8x,f4.1)$/;"	l	subroutine:TDMA	file:
+110	TDMA.f	/^110   format(1x,f4.1,8x,f4.1)$/;"	l	subroutine:TempWrit	file:
+AA	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: AA,/;"	v	module:kgrid_var
+BB	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: AA,BB,/;"	v	module:kgrid_var
+CC	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: AA,BB,CC,/;"	v	module:kgrid_var
+CalMat	CalMat.f	/^      subroutine CalMat(/;"	s
+DD	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: AA,BB,CC,DD,/;"	v	module:kgrid_var
+F	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:)     :: X,Y,F,/;"	v	module:kgrid_var
+Fk	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:)     :: X,Y,F,Fk$/;"	v	module:kgrid_var
+InitMat	InitMat.f	/^      subroutine InitMat$/;"	s
+Inv	TDMA.f	/^      subroutine Inv(/;"	s
+Mul	TDMA.f	/^      subroutine Mul(/;"	s
+NI	kgrid_var.f90	/^      integer*4 :: NI,/;"	v	module:kgrid_var
+NJ	kgrid_var.f90	/^      integer*4 :: NI,NJ$/;"	v	module:kgrid_var
+RR	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: AA,BB,CC,DD,RR$/;"	v	module:kgrid_var
+TDMA	TDMA.f	/^      subroutine TDMA(/;"	s
+TempInit	TDMA.f	/^      subroutine TempInit(/;"	s
+TempWrit	TDMA.f	/^      subroutine TempWrit(/;"	s
+X	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:)     :: X,/;"	v	module:kgrid_var
+Y	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:)     :: X,Y,/;"	v	module:kgrid_var
+Z	kgrid_var.f90	/^      real(kind=8),allocatable,dimension(:,:,:) :: Z$/;"	v	module:kgrid_var
+cf	kgrid_var.f90	/^      real(kind=8) :: dis_first,dis_ratio,dc,cf$/;"	v	module:kgrid_var
+dc	kgrid_var.f90	/^      real(kind=8) :: dis_first,dis_ratio,dc,/;"	v	module:kgrid_var
+dis_first	kgrid_var.f90	/^      real(kind=8) :: dis_first,/;"	v	module:kgrid_var
+dis_ratio	kgrid_var.f90	/^      real(kind=8) :: dis_first,dis_ratio,/;"	v	module:kgrid_var
+i	kgrid.f	/^      in/;"	v	program:kgrid
+j	kgrid.f	/^      integer*4 :: i,j$/;"	v	program:kgrid
+kgrid	kgrid.f	/^      program kgrid$/;"	p
+kgrid_var	kgrid_var.f90	/^module kgrid_var$/;"	m
