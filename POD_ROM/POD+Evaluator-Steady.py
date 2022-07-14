@@ -22,9 +22,9 @@ zone1_i = 401
 zone1_j = 81
 sim_data_path = "./PODresults_LI_0/"
 
-#READ IN THE DESIGN INFORMATION
+#READ CONDITIONS
 
-with open('designs678910.pkl', 'rb') as input:
+with open('conditions678910.pkl', 'rb') as input:
     read_para= pickle.load(input)
 read_paras = np.array(read_para)
 #read in saved rom object
