@@ -21,12 +21,12 @@ res_data_path = "../Data/airfoil_unsteady/results/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
 #create time_configurations
-designs = [list(range(203, 280, 4))]
-print(designs)
+times = [list(range(203, 280, 4))]
+print(times)
 
-#pickle the designs
-with open('designs4.pkl', 'wb') as output:
-    pickle.dump(designs, output, pickle.HIGHEST_PROTOCOL)
+#pickle the times
+with open('times4.pkl', 'wb') as output:
+    pickle.dump(times, output, pickle.HIGHEST_PROTOCOL)
 
 #read extracted array
 saved_npz = np.load("./PODarray4.npz")
