@@ -16,7 +16,7 @@ dt = 0.1
 wt = 1000 
 d_inf = 1.225
 U_inf = 0.005*343
-sim_data_path = "G:\\Backup\\KFLOW\\Unsteady\\Eppler387\\sol01_RANS3\\"
+sim_data_path = "G:\\CFD\\Unsteady\\Eppler387\\sol01_RANS3\\"
 #res_data_path = "../Data/airfoil_unsteady/results/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
@@ -54,7 +54,7 @@ print(shp)
 ###
 t_star = np.arange(Ntime)[:,None]*dt*inc_time # T(=1) x 1
 T = t_star.shape[0]
-print(POD.shape)
+#print(POD.shape)
 xc_star = array_data1[:,0] # NT x 1
 yc_star = array_data1[:,1] # NT x 1
 NT = xc_star.shape[0]
@@ -72,7 +72,7 @@ PC = np.reshape(pc_star, (T,N)).T # N x T
 XC = np.reshape(xc_star, (T,N)).T # N x T
 YC = np.reshape(yc_star, (T,N)).T # N x T
 TC = np.tile(t_star, (1,N)).T # N x T
-####idx_x_slice = np.array([])
+#### Cut grid for memory efficiency 
 idx_x_slice = np.array([])
 for i in range(glayer):
     idx_x_slice = np.append(idx_x_slice, np.arange(cuttail+i*zone1_i, (zone1_i-cuttail)+i*zone1_i)).astype('int32')
@@ -85,15 +85,8 @@ XC_star = XC[idx_x_slice,:]
 YC_star = YC[idx_x_slice,:]
 TC_star = TC[idx_x_slice,:]
 
-#DC_star = DC
-#UC_star = UC
-#VC_star = VC
-#PC_star = PC
-#XC_star = XC
-#YC_star = YC
-#TC_star = TC
 ###
-np.savez("array5_R_20_cuttail.npz", TC=TC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
+np.savez("array4(dataset_20timesteps_RANS_unsteady).npz", TC=TC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
 ### check
 #saved = np.load("./array.npz")
 #print(saved['TC'])
