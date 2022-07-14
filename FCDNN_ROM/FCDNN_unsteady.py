@@ -198,58 +198,7 @@ class HFM(object):
 
         return d_star, u_star, v_star, p_star 
     
-    def predict_drag_lift(self, t_cyl):
-        
-        viscosity = (1.0/self.Rey)
-        
-        theta = np.linspace(0.0,2*np.pi,200)[:,None] # N(=200) x 1
-        d_theta = theta[1,0] - theta[0,0]
-        x_cyl = 0.5*np.cos(theta) # N x 1
-        y_cyl = 0.5*np.sin(theta) # N x 1
-            
-        N = x_cyl.shape[0]
-        T = t_cyl.shape[0]
-        
-        T_star = np.tile(t_cyl, (1,N)).T # N x T
-        X_star = np.tile(x_cyl, (1,T)) # N x T
-        Y_star = np.tile(y_cyl, (1,T)) # N x T
-        
-        t_star = np.reshape(T_star,[-1,1]) # NT x 1
-        x_star = np.reshape(X_star,[-1,1]) # NT x 1
-        y_star = np.reshape(Y_star,[-1,1]) # NT x 1
-        
-        tf_dict = {self.t_eqns_tf: t_star, self.x_eqns_tf: x_star, self.y_eqns_tf: y_star}
-        
-        [p_star,
-         u_x_star,
-         u_y_star,
-         v_x_star,
-         v_y_star] = self.sess.run([self.p_eqns_pred,
-                                    self.u_x_eqns_pred,
-                                    self.u_y_eqns_pred,
-                                    self.v_x_eqns_pred,
-                                    self.v_y_eqns_pred], tf_dict)
-        
-        P_star = np.reshape(p_star, [N,T]) # N x T
-        P_star = P_star - np.mean(P_star, axis=0)
-        U_x_star = np.reshape(u_x_star, [N,T]) # N x T
-        U_y_star = np.reshape(u_y_star, [N,T]) # N x T
-        V_x_star = np.reshape(v_x_star, [N,T]) # N x T
-        V_y_star = np.reshape(v_y_star, [N,T]) # N x T
-    
-        INT0 = (-P_star[0:-1,:] + 2*viscosity*U_x_star[0:-1,:])*X_star[0:-1,:] + viscosity*(U_y_star[0:-1,:] + V_x_star[0:-1,:])*Y_star[0:-1,:]
-        INT1 = (-P_star[1: , :] + 2*viscosity*U_x_star[1: , :])*X_star[1: , :] + viscosity*(U_y_star[1: , :] + V_x_star[1: , :])*Y_star[1: , :]
-            
-        F_D = 0.5*np.sum(INT0.T+INT1.T, axis = 1)*d_theta # T x 1
-    
-        
-        INT0 = (-P_star[0:-1,:] + 2*viscosity*V_y_star[0:-1,:])*Y_star[0:-1,:] + viscosity*(U_y_star[0:-1,:] + V_x_star[0:-1,:])*X_star[0:-1,:]
-        INT1 = (-P_star[1: , :] + 2*viscosity*V_y_star[1: , :])*Y_star[1: , :] + viscosity*(U_y_star[1: , :] + V_x_star[1: , :])*X_star[1: , :]
-            
-        F_L = 0.5*np.sum(INT0.T+INT1.T, axis = 1)*d_theta # T x 1
-            
-        return F_D, F_L
-    
+  
 if __name__ == "__main__":
     with tf.device('/gpu:0'):
         batch_size = 40000  #200000
@@ -409,8 +358,6 @@ if __name__ == "__main__":
                     layers, batch_size, Pec = 1000, Rey = 10)
 
         model.train(total_time = 40, learning_rate=1e-2)
-
-        #F_D, F_L = model.predict_drag_lift(t_star)
     
         # Test Data
         t_pod_test = input_times[:,None]
@@ -435,8 +382,4 @@ if __name__ == "__main__":
             error_v = relative_error(v_pred, VC_star[:,i][:,None])
             error_p = relative_error(p_pred - np.mean(p_pred), PC_star[:,i][:,None] - np.mean(PC_star[:,i][:,None]))
             print('Error d: %e, u: %e, v: %e, p: %e' % (error_d, error_u, error_v, error_p))
-            #print('Error d: %e' % (error_d))
-            #print('Error u: %e' % (error_u))
-            #print('Error v: %e' % (error_v))
-            #print('Error p: %e' % (error_p))
 #"""  
