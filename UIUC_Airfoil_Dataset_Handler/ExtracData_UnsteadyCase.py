@@ -51,7 +51,7 @@ for i in range(0,numd):
 array_data1 = snapshot_data
 shp = array_data1.shape
 print(shp)
-###
+### Vectorize each variable
 t_star = np.arange(Ntime)[:,None]*dt*inc_time # T(=1) x 1
 T = t_star.shape[0]
 #print(POD.shape)
