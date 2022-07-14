@@ -29,17 +29,17 @@ glayer = 100
 cuttail = 100
 d_inf = 1.225
 U_inf = 0.005*343
-sim_data_path = "~/AIRFOIL/KFLOW_2017_04_AirDB/sol_core_1/Airfoil_3_5_5/" #"
+sim_data_path = "~/AIRFOIL/AirDB/sol_core_1/Airfoil_3_5_5/" #"
 res_data_path = "~/DaDri/AirfoilDB/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
 #create time_configurations
-designs = list(itertools.product(*[Re,Mach,AOA]))
-print(designs)
+conditions = list(itertools.product(*[Re,Mach,AOA]))
+print(conditions)
 
-#pickle the designs
-with open('designs678910.pkl', 'wb') as output:
-    pickle.dump(designs, output, pickle.HIGHEST_PROTOCOL)
+#pickle the conditions
+with open('conditions678910.pkl', 'wb') as output:
+    pickle.dump(conditions, output, pickle.HIGHEST_PROTOCOL)
 
 #read extracted array
 saved_npz = np.load("./PODarray678910.npz")
