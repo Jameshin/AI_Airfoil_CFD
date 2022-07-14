@@ -6,13 +6,6 @@ import pandas as pd
 import pickle
 import RomObject
 
-#tf.compat.v1.disable_eager_execution()
-#os.environ["CUDA_VISIBLE_DEVICES"]='0,1'
-#config = tf.ConfigProto()
-#config.gpu_options.per_process_gpu_memory_fraction =1.0
-#config.gpu_options.allow_growth = True
-#session = tf.InteractiveSession(config=config)
-
 #initiate variables
 noCol = 11
 noConcernVar = 4
@@ -23,10 +16,7 @@ zone1_i = 689
 zone1_j = 145
 glayer = 100
 dt = 0.1
-wt = 1000
-d_inf = 1.225
-U_inf = 0.005*343
-sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3/" #"../Data/airfoil_unsteady/"
+sim_data_path = "~/Data/airfoil_unsteady/" 
 res_data_path = "../Data/airfoil_unsteady/results/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
