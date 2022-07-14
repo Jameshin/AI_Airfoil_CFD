@@ -35,8 +35,8 @@ for j in range(Nfoil):
                 Ncase += 1
 print(Nfoil, Ncon, Ncase)
 
-###
-snapshot_data = [] # np.array([])   []
+### It is better to use "append list" than "vstack array"
+snapshot_data = [] 
 #POD = np.array([])
 for i in range(Ncase):
     pd_data1 = pd.read_csv(foilcases[i], na_filter=True, dtype='float64', delimiter=' ', skipinitialspace=True, skiprows=2, header=None)
@@ -92,15 +92,8 @@ XC_star = np.transpose(XC[:,:,idx_x_slice], (0,1,2))
 YC_star = np.transpose(YC[:,:,idx_x_slice], (0,1,2))
 CC_star = np.transpose(CC[:,:,idx_x_slice], (0,1,2))
 
-#DC_star = DC
-#UC_star = UC
-#VC_star = VC
-#PC_star = PC
-#XC_star = XC
-#YC_star = YC
-#TC_star = TC
 ###
-np.savez("./array_foil_UIUC_cuttail2064_AOA16.npz", CC=CC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
+np.savez("./array_foil_cuttail.npz", CC=CC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
 ### check
 #saved = np.load("./array_foil_cuttail.npz")
 print("***run time(sec) :", int(time.time()) - start)
