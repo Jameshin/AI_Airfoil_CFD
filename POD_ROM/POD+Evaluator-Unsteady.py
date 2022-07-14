@@ -12,14 +12,14 @@ import pandas as pd
 
 #perform coefficient interpolation here, using numpy for it
 total_steps =19
-input_design = np.arange(202, 240, 2)
+infer_times = np.arange(202, 240, 2)
 noConcernVar = 4
 zone1_i = 689
 zone1_j = 145
 
-#READ IN THE DESIGN INFORMATION
-with open('designs4.pkl', 'rb') as input:
-    read_designs = pickle.load(input)[0]
+#READ TRAIN TIMES
+with open('times4.pkl', 'rb') as input:
+    train_times = pickle.load(input)[0]
 
 #read in saved rom object
 with open('rom-object4.pkl', 'rb') as input:
@@ -36,16 +36,15 @@ u = read_rom.umat
 mean_data = read_rom.mean_data
 mean_tensor = tf.constant(mean_data, name="mean_data_tensor")
 
-print(read_designs)
+print(train_times)
 
-
-# In this small case, CPU without GPU and use numpy 
-for i, x in zip(range(total_steps), input_design):
+# Use Tensorflow 1.x 
+for i, x in zip(range(total_steps), infer_times):
     print(i)
-    hi_idx = [idx for idx,v in enumerate(read_designs) if v > x][0]
+    hi_idx = [idx for idx,v in enumerate(train_times) if v > x][0]
     lo_idx = hi_idx - 1
     #interpolate coefficients
-    interp_coeffs = coeffs[lo_idx] + (coeffs[hi_idx]-coeffs[lo_idx])*(x-read_designs[lo_idx])/(read_designs[hi_idx]-read_designs[lo_idx])
+    interp_coeffs = coeffs[lo_idx] + (coeffs[hi_idx]-coeffs[lo_idx])*(x-train_times[lo_idx])/(train_times[hi_idx]-train_times[lo_idx])
     int_coeff_tensor = tf.Variable(interp_coeffs)
     #add a dim to make it a 2-D tensor
     int_coeff_tensor = tf.expand_dims(int_coeff_tensor, 0)
