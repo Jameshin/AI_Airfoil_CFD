@@ -35,9 +35,6 @@ for j in range(Nfoil):
             Ncase += 1
 print(Nfoil, Ncase)
 ###
-start = int(time.time())
-
-
 def snapshot_dataset(i,j):        
         pd_data1 = pd.read_csv(foilcases[i*Ncon+j], na_filter=True, dtype='float64', delimiter=' ', skipinitialspace=True, skiprows=2, header=None)
         data = np.nan_to_num(pd_data1.values)
