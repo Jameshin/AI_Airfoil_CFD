@@ -19,8 +19,7 @@ dt = 1
 wt = 1000 
 d_inf = 1.225
 U_inf = 0.005*343
-sim_data_path = "D:\\JupyterNBook\\PINN_Unstruc\\cfddata\\result_Ma0.4_AOA15\\"
-res_data_path = "../Data/airfoil_unsteady/results/"
+sim_data_path = "D:\\JupyterNBook\\Unstruc\\cfddata\\result_Ma0.4_AOA15\\"
 Tecplot_header_in = "variables =x, y, rho, u, v, p, m"
 Tecplot_header_out = "variables =x, y, rho, u, v, p, m"
 #create time_configurations
