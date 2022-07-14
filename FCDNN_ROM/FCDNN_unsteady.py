@@ -1,5 +1,6 @@
 #"""
-#@author: Maziar Raissi
+#@original author: Maziar Raissi
+# edited by James Shin
 #"""
 
 import tensorflow.compat.v1 as tf
@@ -12,8 +13,7 @@ import pandas as pd
 import pickle
 import RomObject
 
-from CFDFunctions3 import neural_net, Euler_uComp_2D, Gradient_Velocity_2D, \
-                      tf_session, mean_squared_error, relative_error
+from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_error
 
 tf.compat.v1.disable_eager_execution()
 
@@ -48,67 +48,28 @@ class HFM(object):
         noConcernsVar = 4 
         N = x_data.shape[0]
         T = t_pod_data.shape[0]
-        # data
-        #[self.t_pod_data, self.t_pod_eqns, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [t_pod_data, t_pod_eqns, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
+        # data        
         [self.t_data, self.x_data, self.y_data, self.l_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, l_data, d_data, u_data, v_data, p_data]
-        #self.a_data = tf.concat([self.a0_data, self.a1_data,
-        #                            self.a2_data,
-        #                            self.a3_data, self.a4_data,
-        #                            self.a5_data, self.a6_data,
-        #                            self.a7_data, self.a8_data,
-        #                            self.a9_data, self.a10_data,
-        #                            self.a11_data, self.a12_data,
-        #                            self.a13_data, self.a14_data,
-        #                            self.a15_data, self.a16_data,
-        #                            self.a17_data, self.a18_data,
-        #                            self.a19_data], axis=1) 
+        
         # placeholders
         [self.t_pod_data_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf, self.a0_data_tf, self.a1_data_tf, self.a2_data_tf, self.a3_data_tf, self.a4_data_tf, self.a5_data_tf, self.a6_data_tf, self.a7_data_tf, self.a8_data_tf, self.a9_data_tf, self.a10_data_tf, self.a11_data_tf, self.a12_data_tf, self.a13_data_tf, self.a14_data_tf, self.a15_data_tf, self.a16_data_tf, self.a17_data_tf, self.a18_data_tf, self.a19_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(25)]
         [self.t_pod_eqns_tf, self.t_data_tf, self.x_data_tf, self.y_data_tf, self.l_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(5)]
 
-        # physics "uninformed" neural networks
+        # neural networks
         self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, self.l_data, layers = self.layers) #[3,12,12,12,12,12,12,12,4])
-        #print(np.array(self.t_pod_data).shape)
         
-        # physics "informed" neural networks
         [self.d_data_pred, 
          self.u_data_pred,
          self.v_data_pred,
          self.p_data_pred] = self.net_duvp(self.t_data_tf,
                                            self.x_data_tf,
-                                           self.y_data_tf, self.l_data_tf)
-
-        #[self.e1_data_pred,
-        # self.e2_data_pred,
-        # self.e3_data_pred, 
-        self.e1_data_pred = Euler_uComp_2D(self.d_data_pred, 
-                                               self.u_data_pred,
-                                               self.v_data_pred,
-                                               self.p_data_pred,
-                                               self.t_data_tf,
-                                               self.x_data_tf,
-                                               self.y_data_tf,
-                                               self.Pec,
-                                               self.Rey)
-        #'''
-        # gradients required for the lift and drag forces
-        #[self.u_x_eqns_pred,
-        # self.v_x_eqns_pred,
-        # self.u_y_eqns_pred,
-        # self.v_y_eqns_pred] = Gradient_Velocity_2D(self.u_eqns_pred,
-        #                                            self.v_eqns_pred,
-        #                                            self.x_eqns_tf,
-        #                                            self.y_eqns_tf)
+                                           self.y_data_tf, self.l_data_tf)   
         
         # loss
         self.loss = mean_squared_error(self.d_data_pred, self.d_data_tf) + \
                     mean_squared_error(self.u_data_pred, self.u_data_tf) + \
                     mean_squared_error(self.v_data_pred, self.v_data_tf) + \
-                    mean_squared_error(self.p_data_pred, self.p_data_tf) + \
-                    mean_squared_error(self.e1_data_pred, 0.0) #+ \
-                    #mean_squared_error(self.e2_data_pred, 0.0) + \
-                    #mean_squared_error(self.e3_data_pred, 0.0) #+ \
-                    #mean_squared_error(self.e4_data_pred, 0.0)
+                    mean_squared_error(self.p_data_pred, self.p_data_tf) 
         
         # optimizers
         self.global_step = tf. Variable(0, trainable = False, name='global_step')
