@@ -2,12 +2,8 @@ import os
 from pickle import NONE
 import time
 import random
-
-#import IPython.display as display
-import matplotlib.pyplot as plt # Matplotlib is used to generate plots of data.
-import matplotlib.image as mpimg
 import pandas as pd
-import numpy as np # Numpy is an efficient linear algebra library.
+import numpy as np 
 import tensorflow as tf
 from tensorflow.keras import layers, losses, optimizers
 from tensorflow.keras.datasets import fashion_mnist
@@ -15,20 +11,9 @@ from tensorflow.keras.models import Model
 
 from CFDLib import mean_squared_error, relative_error
 
-# Save the model for further use
-EXPERIMENT_ID = "train_3"
-#MODEL_SAVE_PATH = os.path.join("F:\\JupyterNBook\\GAN_Fast\\lecture hands on lab\\model0\\", EXPERIMENT_ID)
-#if not os.path.exists(MODEL_SAVE_PATH):
-#    os.makedirs(MODEL_SAVE_PATH)
-#CHECKPOINT_DIR = os.path.join(MODEL_SAVE_PATH, 'training_checkpoints')
-
 # Data path
-#sim_data_path = "D:\\JupyterNBook\\HFM-master\\Data\\airfoil_steady\\"
-#work_path = "D:\\JupyterNBook\\GAN_Fast\\lecture hands on lab\\UIUC_result\\"
 DATA_PATH = "C:\\SimData\\UIUC_ML\\array_foil_UIUC_cuttail0064.npz"
 
-#total_steps = 20
-#input_times = np.arange(203, 280, 4)*dt
 noConcernVar = 4
 zone1_i = 401
 zone1_j = 81
@@ -38,37 +23,35 @@ cuttail = 0
 # Model parameters
 BATCH_SIZE = 1530
 EPOCHS = 6000
-LATENT_DEPTH = 64
+#LATENT_DEPTH = 64
 IMAGE_SHAPE = [zone1_i, zone1_j]
 NB_CHANNELS = 1
 LR = 1e-4
 
-# Load Data
-
-# create directory if not exist
-#os.makedirs(os.path.dirname(res_data_path), exist_ok=True)
+### Load Data
+Re = np.array([1.0e5])
+Mach = np.array([0.2])
+AOA = np.array([1.0])
 # list of file names
-filenames = []
-Ntime = 0
-numd = 1550
-initial_time = 1
-inc_time = 1
-dt = 0.1
-for i in range(0, numd):
-    #filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
-    Ntime += 1
-#print(Ntime, filenames)
-t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
+filenames = [] 
+Nfoil = 1550
+numd = Nfoil*Re.shape[0]*Mach.shape[0]*AOA.shape[0]
+Ncon = 0
+for j in range(Nfoil):
+    sim_data_path = data_path + 'Airfoil_' + str(j+1).rjust(4,'0') + '/'
+    for k in range(1,Re.shape[0]+1):
+        for l in range(1,Mach.shape[0]+1):
+            for m in range(1,AOA.shape[0]+1):
+                filenames.append(sim_data_path+"result_"+str(k)+"_"+str(l)+"_"+str(m).rjust(2, '0')+"/flo001.dat")
+            Ncon += 1
+print(Nfoil, Ncon)
 ###
-#perform coefficient interpolation here, using numpy for it
 
 #read xy-coordinates
-saved_npz = np.load(DATA_PATH) #array6_R_50_cuttail
+saved_npz = np.load(DATA_PATH) 
 XC_star = saved_npz['XC']
 YC_star = saved_npz['YC']
 xydata = np.hstack((XC_star[:,0][:,None], YC_star[:,0][:,None]))
-#x = np.reshape(xydata[:,0:1], [numd, glayer, zone1_i-2*cuttail])
-#y = np.reshape(xydata[:,1:2], [numd, glayer, zone1_i-2*cuttail])
 
 #Shape vector
 idx_bottom = np.where(xydata[:,0] == xydata[1,0])[0]        
@@ -89,29 +72,8 @@ idx_x_ff = np.append([], idx_x_ff_data).astype('int32')
 T = Ntime
 N = xydata.shape[0]
 print(idx_x_sur)
-'''
-LC_star = []
-for i in range(T):
-    label = np.ones(N)*i
-    label[idx_x_ff] = 200
-    label[idx_x_sur] = 100
-    LC_star = np.append(LC_star, label)
-'''
-
-label = np.zeros(N)
-#for j in range(glayer):
-#    for i in range(zone1_i-2*cuttail-1):
-#        label[i+j*(zone1_i-2*cuttail-1)] = abs((zone1_i-2*cuttail-1)/2-i) #i+j*(zone1_i-2*cuttail-1)
-#label[idx_x_bd] = 200
-label[idx_x_sur] = 100
-#label[idx_x_ff] = 300
-#label[idx_x_sur2] = 3
-#label[idx_x_sur3] = 4
-LC_star = np.tile(label, (T,1))
 
 #Data Extration
-#TC_star = saved_npz['TC']
-#TC_star = saved_npz['TC']
 #XC_star = saved_npz['XC']
 #YC_star = saved_npz['YC']
 DC_star = saved_npz['DC']
@@ -127,10 +89,6 @@ XT_star = np.reshape(XC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:nu
 XT_field = XT_star[:,:,:-1] #,np.newaxis
 YT_star = np.reshape(YC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:] #BATCH_SIZE:numd
 YT_field = YT_star[:,:,:-1] #,np.newaxis
-LI_star = np.reshape(LC_star, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-LI_field = LI_star[:,:,:-1] #,np.newaxis
-LT_star = np.reshape(LC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
-LT_field = LT_star[:,:,:-1] #,np.newaxis
 UI_star = np.reshape(UC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
 UC_field = UI_star[:,:,:-1] #,np.newaxis
 VI_star = np.reshape(VC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
@@ -144,33 +102,15 @@ VT_field = VT_star[:,:,:-1] #,np.newaxis
 PT_star = np.reshape(PC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
 PT_field = PT_star[:,:,:-1] #,np.newaxis
 
-#LC_field = np.reshape(LC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
-#TC_field = np.reshape(TC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
 #XC_field = np.reshape(XC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
 #YC_field = np.reshape(YC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
 Input_field = np.stack([XI_field, YI_field], axis=3) #XC_field, YC_field,
 Test_field = np.stack([XT_field, YT_field], axis=3)
-#DC_field = np.reshape(DC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-#UC_field = np.reshape(UC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
-#VC_field = np.reshape(VC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-#PC_field = np.reshape(PC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
 Field_star = np.stack([UC_field, VC_field, PC_field], axis=3) #, VC_field, PC_field
-#UC_field = np.transpose(UC_field[:, :, :], (0, 2, 1))
-#Field_bd1 = np.stack([UC_bd1, VC_bd1, PC_bd1], axis=3)
-#Field_bd2 = np.stack([UC_bd2, VC_bd2, PC_bd2], axis=3)
 
 @tf.function
-def preprocessing_data(path):
-    image = tf.io.read_file(path)
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.image.resize(image, [IMAGE_SHAPE[0],IMAGE_SHAPE[1]])
-    image = image / 255.0
-    return image
-
 def dataloader(paths):
     dataset = tf.data.Dataset.from_tensor_slices(paths)
-    #dataset = dataset.shuffle(10* BATCH_SIZE)
-    #dataset = dataset.map(preprocessing_data)
     dataset = dataset.batch(BATCH_SIZE)
     dataset = dataset.prefetch(1)
     return dataset
@@ -179,7 +119,7 @@ datasetI = dataloader(Input_field)
 train_inp = []
 for batch in datasetI.take(1):
     for i, img_inp in enumerate(batch):
-        img_inp_np = img_inp.numpy() #np.reshape(img.numpy(), IMAGE_SHAPE) #[:,:,0]
+        img_inp_np = img_inp.numpy() 
         train_inp.insert(i, img_inp_np)
 train_inp = np.array(train_inp, dtype="float32")
 print(train_inp.shape)
@@ -192,12 +132,8 @@ datasetO = dataloader(Field_star) #UC_field
 train_env = []
 for batch in datasetO.take(1):
     for i, img in enumerate(batch):
-        img_np = img.numpy() #np.reshape(img.numpy(), IMAGE_SHAPE) #[:,:,0]
+        img_np = img.numpy() 
         train_env.insert(i, img_np)
-        #print(batch.shape, img_np.shape)
-        #plt.figure()
-        #plt.axis('off')
-        #plt.imshow((img_np-img_np.min())/(img_np.max()-img_np.min()))
 train_env = np.array(train_env, dtype="float32")
 print(train_env.shape)
 
@@ -205,7 +141,7 @@ datasetT = dataloader(Test_field)
 train_test = []
 for batch in datasetT.take(1):
     for i, img_test in enumerate(batch):
-        img_test_np = img_test.numpy() #np.reshape(img.numpy(), IMAGE_SHAPE) #[:,:,0]
+        img_test_np = img_test.numpy() 
         train_test.insert(i, img_test_np)
 train_test = np.array(train_test, dtype="float32")
 
@@ -285,10 +221,8 @@ def custom_mse(idx_x_bd1, idx_x_bd2): #
 
 
 unet = Model(inputs=input_e, outputs=output_d)
-#unet = Model(inputs=[input_e, time], outputs=output_d)
 unet.compile(optimizer='adam', loss=custom_mse(idx_x_bd1,idx_x_bd2), metrics=["mse"]) #optimizers.Adam(learning_rate=0.005), loss=losses.MeanSquaredError() custom_mse(train_env, output_d, idx_x_bd1, idx_x_bd2)
 unet.fit(train_inp, train_env, validation_split=0.1, epochs=3000, verbose=2) #3000
-#unet.fit([train_inp, time_inp], train_env, validation_split=0.2, epochs=5000, verbose=2)
 unet.save('my_model.h5')
 '''
 # Load saved model from checkpoint directory
@@ -297,21 +231,16 @@ unet = tf.keras.models.load_model('my_model.h5', compile=False) #, custom_object
 decoded_imgs = unet([train_test]).numpy() #,time_test
 
 for i in range(20):
-    #t_test = T_test.T[:,i:i+1]
     x_star = XT_field[i].flatten()[:,None]
-    y_star = YT_field[i].flatten()[:,None]
-    #l_test = L_star.T[:,i:i+1]
-    
-    #u_pred =decoded_imgs[i].flatten()[:,None]
+    y_star = YT_field[i].flatten()[:,None]    
     u_pred = decoded_imgs[i,:,:,0].flatten()[:,None]
     v_pred = decoded_imgs[i,:,:,1].flatten()[:,None]
     p_pred = decoded_imgs[i,:,:,2].flatten()[:,None]
-    #d_pred, u_pred, v_pred, p_pred = model.predict(t_test, x_test, y_test, l_test)
-    p3d_result = np.hstack((x_star, y_star, u_pred, v_pred, p_pred)) #u_pred, v_pred, p_pred
+    
+    p3d_result = np.hstack((x_star, y_star, u_pred, v_pred, p_pred)) 
     
     np.savetxt("./Case_flo_unet_UIUC_n="+str(i).rjust(2,'0')+".dat", p3d_result, delimiter=" ", header="variables = X, Y, u, v, p \n zone i="+str(zone1_i-2*cuttail-1)+" j="+str(glayer)+" ", comments=' ')
     # Error
-    #error_d = relative_error(d_pred, DC_star[:,i][:,None])
     error_u = relative_error(u_pred, UT_field[i,:,:].flatten()[:,None])
     error_v = relative_error(v_pred, VT_field[i,:,:].flatten()[:,None])
     error_p = relative_error(p_pred, PT_field[i,:,:].flatten()[:,None])
