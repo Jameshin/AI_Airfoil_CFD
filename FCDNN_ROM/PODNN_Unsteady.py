@@ -21,9 +21,7 @@ class HFM(object):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
-    # _eqns: points used to regress the equations
     # _data: input-output data
-    # _inlet: input-output data at the inlet
     # _star: preditions
     
     def __init__(self, l_pod_data, t_pod_data, t_pod_eqns, t_data, x_data, y_data, 
