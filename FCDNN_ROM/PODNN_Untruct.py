@@ -178,8 +178,7 @@ if __name__ == "__main__":
         ###
         #perform coefficient interpolation here, using numpy for it
         total_steps = 50
-        #input_design = [251 + x for x in range(total_steps)]
-        input_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
+        infer_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
         noConcernVar = 4
 
         #READ IN THE POD DESIGN INFORMATION
@@ -216,10 +215,7 @@ if __name__ == "__main__":
         N = int(XE_star.shape[0])
         l_pod_data = np.tile(np.arange(Ntime)[:,None], (T,1))
         t_pod_data = np.repeat(t_star[:,None], T, axis=0)
-        #print(t_pod_data.shape,l_pod_data.shape, '########')
         T_star = np.tile(t_star, (N,1))
-        #X_star = np.tile(xydata[:,0], T)
-        #Y_star = np.tile(xydata[:,1], T)
         #L_star = np.tile(label, (T,1))
         A_star = coeffs.flatten()[:,None]
         d_data = DC_star.T.flatten()[:,None]
@@ -230,14 +226,6 @@ if __name__ == "__main__":
         x_data = XE_star.T.flatten()[:,None]
         y_data = YE_star.T.flatten()[:,None]
         #l_data = L_star.flatten()[:,None]
-        t_pod_eqns = np.repeat(input_times[:,None], T, axis=0)
-        #T_eqns = input_times.shape[0]
-        #N_eqns = N 
-        print(t_pod_data.shape,t_pod_data.shape, A_star.shape, d_data.shape, u_data.shape, p_data.shape, t_data.shape, x_data.shape, '########')
-        #t_eqns = np.tile(t_pod_eqns, (1,N_eqns)).flatten()[:,None]
-        #xy_eqns = np.tile(xydata, (T_eqns,1))
-        #x_eqns = xy_eqns[:,0][:,None]
-        #y_eqns = xy_eqns[:,1][:,None]
     
         #sys.stdout = open('stdout_PODDNN.txt', 'w')
         # Training
@@ -249,7 +237,7 @@ if __name__ == "__main__":
         #model.train(total_time = 1, learning_rate=5e-3)
     
         # Test Data
-        t_test = np.repeat(input_times[:,None], T, axis=0)
+        t_test = np.repeat(infer_times[:,None], T, axis=0)
     
         # Prediction
         a_pred = model.predict(l_pod_data, t_test)
