@@ -14,7 +14,7 @@ from itertools import product
 
 #tf.compat.v1.disable_eager_execution()
 
-def predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur, v_sur, psur_star, u_sur2, v_sur2):
+def predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur, v_sur, psur_star, u_sur2, v_sur2, dsur_star):
 
 	NRe = Re.shape[0]
 	NAOA = AOA.shape[0]
@@ -40,23 +40,18 @@ def predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur,
 	tsur_star = np.reshape(Tsur_star,[-1,1]) # NsurT x 1
 	xsur_star = np.reshape(Xsur_star,[-1,1]) # NsurT x 1
 	ysur_star = np.reshape(Ysur_star,[-1,1]) # NsurT x 1
-	
-	#U_star = np.reshape(usur_star, [Nsur,Tsur]) # CNsur x T
-	#V_star = np.reshape(vsur_star, [Nsur,Tsur]) # CNsur x T
-	#U_x_star = np.reshape(u_x_sur, [Nsur,Tsur])
-	#U_y_star = np.reshape(u_y_sur, [Nsur,Tsur])
-	#V_x_star = np.reshape(v_x_sur, [Nsur,Tsur])
-	#V_y_star = np.reshape(v_y_sur, [Nsur,Tsur])
 
-	# gradients required for the lift and drag forces
-	#v_y_star = v_y[:,y_sur]
-	#v_y_star = np.append(v_y_star, np.gradient(V_star[:,i], y_sur)
-	#v_x_star[v_x_star == -np.inf] = 0
-	#[u_x_star,v_x_star,u_y_star,v_y_star] = sess.run([u_x,v_x,u_y,v_y], feed_dict={xur_tf:xsur_star, ysur_tf:ysur_star, usur_tf:usur_star, vsur_tf:vsur_star})
 	P_star = np.reshape(psur_star, [Nsur,Tsur]) # CNsur x T
-	P_star = P_star - np.mean(P_star, axis=0)
+	D_star = np.reshape(dsur_star, [Nsur,Tsur])
 	#print(U_star, U_y_star)
 
+	#Viscosity
+	Uinf = 0.6*np.sqrt(1.4*8.314*288)
+	Tinf = 288*8.314/Uinf/Uinf
+	T_star = P_star/D_star
+	vis = (Tinf+110.4)/(T_star+110.4)*np.power(T_star/Tinf, 1.5)
+	
+	## verical and parallel vectors on the aifoil surface 
 	tck, u = interpolate.splprep([xm,ym],k=3,s=0)
 	out = interpolate.splev(u,tck)
 	der = interpolate.splev(u,tck, der=1)
@@ -70,22 +65,16 @@ def predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur,
 	dn_star = np.tile(dn, (Tsur,1)).T
 	print(u_sur2)
 
+	### integration 
 	F_D = []
 	F_L = []
-	INT0 = ((-P_star[0:Nsur-1,:] + Re_inv*((u_sur2[0:Nsur-1,:]-u_sur[0:Nsur-1,:])*ny_star[0:Nsur-1,:]-(v_sur2[0:Nsur-1,:]-v_sur[0:Nsur-1,:])*nx_star[0:Nsur-1,:])/dn_star)*nx_star[0:Nsur-1,:])*ds_star
-	INT1 = ((-P_star[1:Nsur,:] + Re_inv*((u_sur2[1:Nsur,:]-u_sur[1:Nsur,:])*ny_star[0:Nsur-1,:]-(v_sur2[1:Nsur,:]-v_sur[1:Nsur,:])*nx_star[0:Nsur-1,:])/dn_star)*nx_star[0:Nsur-1,:])*ds_star
-	#INT0 = ((-P_star[0:Nsur-1,:] + 2*Re_inv*U_x_star[0:Nsur-1,:])*nx_star[0:Nsur-1,:] + Re_inv*(U_y_star[0:Nsur-1,:] + V_x_star[0:Nsur-1,:])*ny_star[0:Nsur-1,:])*ds_star
-	#INT1 = ((-P_star[1:Nsur,:] + 2*Re_inv*U_x_star[1:Nsur,:])*nx_star[0:Nsur-1,:] + Re_inv*(U_y_star[1:Nsur,:] + V_x_star[1:Nsur,:])*ny_star[0:Nsur-1,:])*ds_star
+	INT0 = (-P_star[0:Nsur-1,:]*nx_star[0:Nsur-1,:]*0 + vis[0:Nsur-1,:]*Re_inv*(3*(u_sur2[0:Nsur-1,:]-u_sur[0:Nsur-1,:])+(v_sur2[0:Nsur-1,:]-v_sur[0:Nsur-1,:])*(ny_star[0:Nsur-1,:]/nx_star[0:Nsur-1,:]))/dn_star)*ds_star
+	INT1 = (-P_star[1:Nsur,:]*nx_star[0:Nsur-1,:]*0 + vis[1:Nsur,:]*Re_inv*(3*(u_sur2[1:Nsur,:]-u_sur[1:Nsur,:])+(v_sur2[1:Nsur,:]-v_sur[1:Nsur,:])*(ny_star[0:Nsur-1,:]/nx_star[0:Nsur-1,:]))/dn_star)*ds_star
 	F_D = np.append(F_D, 0.5*np.sum(INT0 + INT1, axis = 0)) # F_D = Csur x T
 
-	INT0 = ((-P_star[0:Nsur-1,:] + Re_inv*((u_sur2[0:Nsur-1,:]-u_sur[0:Nsur-1,:])*ny_star[0:Nsur-1,:]-(v_sur2[0:Nsur-1,:]-v_sur[0:Nsur-1,:])*nx_star[0:Nsur-1,:])/dn_star)*ny_star[0:Nsur-1,:])*ds_star
-	INT1 = ((-P_star[1:Nsur,:] + Re_inv*((u_sur2[1:Nsur,:]-u_sur[1:Nsur,:])*ny_star[0:Nsur-1,:]-(v_sur2[1:Nsur,:]-v_sur[1:Nsur,:])*nx_star[0:Nsur-1,:])/dn_star)*ny_star[0:Nsur-1,:])*ds_star
-	#INT0 = ((-P_star[0:Nsur-1,:] + 2*Re_inv*V_y_star[0:Nsur-1,:])*ny_star[0:Nsur-1,:] + Re_inv*(U_y_star[0:Nsur-1,:] + V_x_star[0:Nsur-1,:])*nx_star[0:Nsur-1,:])*ds_star
-	#INT1 = ((-P_star[1:Nsur,:] + 2*Re_inv*V_y_star[1:Nsur,:])*ny_star[0:Nsur-1,:] + Re_inv*(U_y_star[1:Nsur,:] + V_x_star[1:Nsur,:])*nx_star[0:Nsur-1,:])*ds_star
+	INT0 = (-P_star[0:Nsur-1,:]*ny_star[0:Nsur-1,:]*0 + vis[0:Nsur-1,:]*Re_inv*((u_sur2[0:Nsur-1,:]-u_sur[0:Nsur-1,:])*(nx_star[0:Nsur-1,:]/ny_star[0:Nsur-1,:])+3*(v_sur2[0:Nsur-1,:]-v_sur[0:Nsur-1,:]))/dn_star)*ds_star
+	INT1 = (-P_star[1:Nsur,:]*ny_star[0:Nsur-1,:]*0 + vis[1:Nsur,:]*Re_inv*((u_sur2[1:Nsur,:]-u_sur[1:Nsur,:])*(nx_star[0:Nsur-1,:]/ny_star[0:Nsur-1,:])+3*(v_sur2[1:Nsur,:]-v_sur[1:Nsur,:]))/dn_star)*ds_star
 	F_L = np.append(F_L, 0.5*np.sum(INT0 + INT1, axis = 0)) # F_L = Csur x T
-
-	F_L = F_L*np.sin(AOA_CLCD*math.pi/180)+F_D*np.cos(AOA_CLCD*math.pi/180) #np.sqrt(F_D*F_D+F_L*F_L)*np.cos(AOA_CLCD*math.pi/180) 
-	F_D = F_L*np.cos(AOA_CLCD*math.pi/180)-F_D*np.sin(AOA_CLCD*math.pi/180) #np.sqrt(F_D*F_D+F_L*F_L)*np.sin(AOA_CLCD*math.pi/180) 
 
 	return F_L, F_D
 
@@ -193,21 +182,20 @@ if __name__ == "__main__":
     y_sur = single_data[:,1][idx_x_sur]
     x_sur2 = single_data[:,0][idx_x_sur2]
     y_sur2 = single_data[:,1][idx_x_sur2]
-    N_d = 3*zone1_i 
-    idx_xc_diff = np.arange(0,N_d)
     #print(idx_x_sur)
     #t_sur = TC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
     #x_sur = XC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
     #y_sur = YC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
     u_sur = UC[idx_x_sur,:][:,idx_t_bd]#.flatten()[:,None]
     v_sur = VC[idx_x_sur,:][:,idx_t_bd]#.flatten()[:,None]
-    p_sur = PC[idx_x_sur,:][:,idx_t_bd].flatten()[:,None]
+    p_sur = PC[idx_x_sur,:][:,idx_t_bd].flatten()[:,None] 
+    d_sur = DC[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None] 
     u_sur2 = UC[idx_x_sur2,:][:,idx_t_bd]#.flatten()[:,None]
     v_sur2 = VC[idx_x_sur2,:][:,idx_t_bd]#.flatten()[:,None]
     #np.savetxt(res_data_path+"psur.dat", PC[idx_xc_bd,:][:,3], delimiter=" ")
     np.savetxt(res_data_path+"u1u2.dat", np.hstack((u_sur.flatten()[:,None], u_sur2.flatten()[:,None])), delimiter=" ")
     
-    F_L, F_D = predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur, v_sur, p_sur, u_sur2, v_sur2)
+    F_L, F_D = predict_drag_lift(Ncon, Re, AOA, t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur, v_sur, p_sur, u_sur2, v_sur2, d_sur)
     result = np.hstack((F_L[:,None], F_D[:,None]))
     np.savetxt(sim_data_path+"UIUC_CLCD.dat", result, delimiter=" ", header="variables = CL, CD")
     #np.savetxt(res_data_path+"FOM_CLCD.dat", result, delimiter=" ", header="variables = CL, CD")
