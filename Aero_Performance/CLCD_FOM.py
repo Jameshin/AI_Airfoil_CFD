@@ -132,20 +132,8 @@ if __name__ == "__main__":
     YC = np.reshape(yc_star, (T,N)).T # N x T
     TC = np.tile(t_star, (1,N)).T # N x T
     ###
-    #idx_x_slice = np.array([])
-    #for i in range(glayer):
-    #    idx_x_slice = np.append(idx_x_slice, np.arange(cuttail+i*zone1_i, (zone1_i-cuttail)+i*zone1_i)).astype('int32')
-    #    print(idx_x_slice.shape[0])
-    #UC_star = UC[idx_x_slice,:]
-    #VC_star = VC[idx_x_slice,:]
-    #PC_star = PC[idx_x_slice,:]
-    #XC_star = XC[idx_x_slice,:]
-    #YC_star = YC[idx_x_slice,:]
-    #TC_star = TC[idx_x_slice,:]
-    ###
     # Surface Data for CL/CD calculation
-    #idx_tip = np.where(single_data[:,0] == 1.0)[0][0:2]
-    t_bd = T
+    #t_bd = T
     idx_bottom = np.where(single_data[:,0] == single_data[0,0])[0]
     print(idx_bottom)
     for i in range(idx_bottom[1]):
@@ -154,7 +142,7 @@ if __name__ == "__main__":
     idx_tip = [i-1, idx_bottom[1]-i+1]
     #print(single_data[0,0], single_data[idx_bottom[1],0])
     idx_t_bd = np.concatenate([np.array([0]), np.random.choice(T-2, t_bd-2, replace=False)+1, np.array([T-1])]) #idx_t_data
-    T_b = idx_t_bd.shape[0]
+    #T_b = idx_t_bd.shape[0]
     #idx_C_bd = idx_C_data
     idx_x_sur = np.arange(idx_tip[0],idx_tip[1]+1)
     idx_x_sur2 = np.arange(idx_tip[0]+zone1_i,idx_tip[1]+zone1_i+1)
