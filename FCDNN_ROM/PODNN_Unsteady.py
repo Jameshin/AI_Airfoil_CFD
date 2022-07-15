@@ -1,8 +1,3 @@
-#"""
-#@author: Maziar Raissi
-# edited by James Shin
-#"""
-
 import tensorflow.compat.v1 as tf
 import numpy as np
 import scipy.io
@@ -17,14 +12,13 @@ from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_e
 
 tf.compat.v1.disable_eager_execution()
 
-class HFM(object):
+class ROM_DLobject):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
     # _data: input-output data
-    # _star: preditions
     
-    def __init__(self, l_pod_data, t_pod_data, t_pod_eqns, t_data, x_data, y_data, 
+    def __init__(self, l_pod_data, t_pod_data, t_data, x_data, y_data, 
                  d_data, u_data, v_data, p_data, phi, mean_data, a0_data, 
                  a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, 
                  a8_data, a9_data, a10_data,
@@ -47,8 +41,8 @@ class HFM(object):
         N = x_data.shape[0]
         T = t_pod_data.shape[0]
         # data
-        [self.l_pod_data, self.t_pod_dat, self.d_data, self.u_data, self.v_data, self.p_data, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [l_pod_data, t_pod_data, d_data, u_data, v_data, p_data, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
-        [self.t_pod_eqns, self.t_data, self.x_data, self.y_data] = [t_pod_eqns, t_data, x_data, y_data]
+        [self.l_pod_data_tf, self.t_pod_dat, self.d_data, self.u_data, self.v_data, self.p_data, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [l_pod_data, t_pod_data, d_data, u_data, v_data, p_data, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
+        [self.t_data, self.x_data, self.y_data] = [t_data, x_data, y_data]
         self.a_data = tf.concat([self.a0_data, self.a1_data,
                                     self.a2_data,
                                     self.a3_data, self.a4_data,
@@ -61,16 +55,11 @@ class HFM(object):
                                     self.a17_data, self.a18_data,
                                     self.a19_data], axis=1) 
         # placeholders
-        [self.l_pod_data_tf, self.t_pod_data0_tf, self.t_pod_data1_tf, self.t_pod_data2_tf, self.t_pod_data3_tf, self.t_pod_data4_tf, self.t_pod_data5_tf, self.t_pod_data6_tf, self.t_pod_data7_tf, self.t_pod_data8_tf, self.t_pod_data9_tf, self.t_pod_data10_tf, self.t_pod_data11_tf, self.t_pod_data12_tf, self.t_pod_data13_tf, self.t_pod_data14_tf, self.t_pod_data15_tf, self.t_pod_data16_tf, self.t_pod_data17_tf, self.t_pod_data18_tf, self.t_pod_data19_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf, self.a0_data_tf, self.a1_data_tf, self.a2_data_tf, self.a3_data_tf, self.a4_data_tf, self.a5_data_tf, self.a6_data_tf, self.a7_data_tf, self.a8_data_tf, self.a9_data_tf, self.a10_data_tf, self.a11_data_tf, self.a12_data_tf, self.a13_data_tf, self.a14_data_tf, self.a15_data_tf, self.a16_data_tf, self.a17_data_tf, self.a18_data_tf, self.a19_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(45)]
-        [self.t_pod_eqns_tf, self.t_data_tf, self.x_data_tf, self.y_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
-
-        self.t_pod_data = np.tile(self.t_pod_dat, [1,T])
-        print(self.l_pod_data.shape)
-        print(np.array(self.t_pod_data[:,0:1]).shape)
-        # physics "uninformed" neural networks
-        #self.net_pod= neural_net(self.t_pod_data[:,0:1], layers = self.layers)
-        self.net_pod= neural_net(self.l_pod_data, self.t_pod_data[:,0:1], self.t_pod_data[:,1:2], self.t_pod_data[:,2:3], self.t_pod_data[:,3:4], self.t_pod_data[:,4:5], self.t_pod_data[:,5:6], self.t_pod_data[:,6:7], self.t_pod_data[:,7:8], self.t_pod_data[:,8:9], self.t_pod_data[:,9:10], self.t_pod_data[:,10:11], self.t_pod_data[:,11:12], self.t_pod_data[:,12:13], self.t_pod_data[:,13:14], self.t_pod_data[:,14:15], self.t_pod_data[:,15:16], self.t_pod_data[:,16:17], self.t_pod_data[:,17:18], self.t_pod_data[:,18:19], self.t_pod_data[:,19:20], layers = self.layers)
-        #self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, layers = [3,12,12,12,3])
+        [self.l_pod_data_tf, self.t_pod_data_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf, self.a0_data_tf, self.a1_data_tf, self.a2_data_tf, self.a3_data_tf, self.a4_data_tf, self.a5_data_tf, self.a6_data_tf, self.a7_data_tf, self.a8_data_tf, self.a9_data_tf, self.a10_data_tf, self.a11_data_tf, self.a12_data_tf, self.a13_data_tf, self.a14_data_tf, self.a15_data_tf, self.a16_data_tf, self.a17_data_tf, self.a18_data_tf, self.a19_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(26)]
+        [self.t_data_tf, self.x_data_tf, self.y_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(3)]
+        
+        # neural networks
+        self.net_pod= neural_net(self.l_pod_data, self.t_pod_data, layers = self.layers)
         
         [self.a0_data_pred, self.a1_data_pred, self.a2_data_pred, 
          self.a3_data_pred, self.a4_data_pred, self.a5_data_pred, 
@@ -80,7 +69,7 @@ class HFM(object):
          self.a13_data_pred, self.a14_data_pred,
          self.a15_data_pred, self.a16_data_pred,
          self.a17_data_pred, self.a18_data_pred, 
-         self.a19_data_pred] = self.net_pod(self.l_pod_data, self.t_pod_data0_tf, self.t_pod_data1_tf, self.t_pod_data2_tf, self.t_pod_data3_tf, self.t_pod_data4_tf, self.t_pod_data5_tf, self.t_pod_data6_tf, self.t_pod_data7_tf, self.t_pod_data8_tf, self.t_pod_data9_tf, self.t_pod_data10_tf, self.t_pod_data11_tf, self.t_pod_data12_tf, self.t_pod_data13_tf, self.t_pod_data14_tf, self.t_pod_data15_tf, self.t_pod_data16_tf, self.t_pod_data17_tf, self.t_pod_data18_tf, self.t_pod_data19_tf)
+         self.a19_data_pred] = self.net_pod(self.l_pod_data, self.t_pod_data_tf)
                 
         self.a_data_pred = tf.concat([self.a0_data_pred, self.a1_data_pred, 
                                      self.a2_data_pred,
@@ -105,8 +94,7 @@ class HFM(object):
                                     self.a15_data_tf, self.a16_data_tf,
                                     self.a17_data_tf, self.a18_data_tf,
                                     self.a19_data_tf], axis=1) 
-
-        
+         
         # loss
         self.loss = mean_squared_error(self.a_data_pred, self.a_data_tf) 
         
@@ -126,10 +114,7 @@ class HFM(object):
         start_time = time.time()
         running_time = 0
         it = 0
-        while running_time < total_time:
-            
-            idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
-            idx_eqns = np.random.choice(N_eqns, min(self.batch_size, N_eqns))
+        while running_time < total_time:          
             #if it>8000:
             #    learning_rate = 5e-4
             if it>15000:
@@ -161,29 +146,8 @@ class HFM(object):
                                 self.a17_data, self.a18_data,
                                 self.a19_data)
 
-            t_pod_eqns_batch = self.t_pod_eqns
 
-
-            tf_dict = {self.t_pod_data0_tf: t_pod_data_batch[:,0:1],
-                       self.t_pod_data1_tf: t_pod_data_batch[:,1:2],
-                       self.t_pod_data2_tf: t_pod_data_batch[:,2:3],
-                       self.t_pod_data3_tf: t_pod_data_batch[:,3:4],
-                       self.t_pod_data4_tf: t_pod_data_batch[:,4:5],
-                       self.t_pod_data5_tf: t_pod_data_batch[:,5:6],
-                       self.t_pod_data6_tf: t_pod_data_batch[:,6:7],
-                       self.t_pod_data7_tf: t_pod_data_batch[:,7:8],
-                       self.t_pod_data8_tf: t_pod_data_batch[:,8:9],
-                       self.t_pod_data9_tf: t_pod_data_batch[:,9:10],
-                       self.t_pod_data10_tf: t_pod_data_batch[:,10:11],
-                       self.t_pod_data11_tf: t_pod_data_batch[:,11:12],
-                       self.t_pod_data12_tf: t_pod_data_batch[:,12:13],
-                       self.t_pod_data13_tf: t_pod_data_batch[:,13:14],
-                       self.t_pod_data14_tf: t_pod_data_batch[:,14:15],
-                       self.t_pod_data15_tf: t_pod_data_batch[:,15:16],
-                       self.t_pod_data16_tf: t_pod_data_batch[:,16:17],
-                       self.t_pod_data17_tf: t_pod_data_batch[:,17:18],
-                       self.t_pod_data18_tf: t_pod_data_batch[:,18:19],
-                       self.t_pod_data19_tf: t_pod_data_batch[:,19:20],
+            tf_dict = {self.t_pod_data_tf: t_pod_data_batch,
                        self.a0_data_tf: a0_data_batch, 
                        self.a1_data_tf: a1_data_batch, self.a2_data_tf: a2_data_batch,
                        self.a3_data_tf: a3_data_batch, self.a4_data_tf: a4_data_batch,
@@ -221,26 +185,7 @@ class HFM(object):
     def predict(self, l_pod_data, t_pod_dat):
         t_pod_data = np.tile(t_pod_dat.T, [T,1])
         tf_dict = {self.l_pod_data_tf: l_pod_data,
-                       self.t_pod_data0_tf: t_pod_data[:,0:1],
-                       self.t_pod_data1_tf: t_pod_data[:,1:2],
-                       self.t_pod_data2_tf: t_pod_data[:,2:3],
-                       self.t_pod_data3_tf: t_pod_data[:,3:4],
-                       self.t_pod_data4_tf: t_pod_data[:,4:5],
-                       self.t_pod_data5_tf: t_pod_data[:,5:6],
-                       self.t_pod_data6_tf: t_pod_data[:,6:7],
-                       self.t_pod_data7_tf: t_pod_data[:,7:8],
-                       self.t_pod_data8_tf: t_pod_data[:,8:9],
-                       self.t_pod_data9_tf: t_pod_data[:,9:10],
-                       self.t_pod_data10_tf: t_pod_data[:,10:11],
-                       self.t_pod_data11_tf: t_pod_data[:,11:12],
-                       self.t_pod_data12_tf: t_pod_data[:,12:13],
-                       self.t_pod_data13_tf: t_pod_data[:,13:14],
-                       self.t_pod_data14_tf: t_pod_data[:,14:15],
-                       self.t_pod_data15_tf: t_pod_data[:,15:16],
-                       self.t_pod_data16_tf: t_pod_data[:,16:17],
-                       self.t_pod_data17_tf: t_pod_data[:,17:18],
-                       self.t_pod_data18_tf: t_pod_data[:,18:19],
-                       self.t_pod_data19_tf: t_pod_data[:,19:20]}
+                       self.t_pod_data_tf: t_pod_data}
         
         a0_star = self.sess.run(self.a0_data_pred, tf_dict)
         a1_star = self.sess.run(self.a1_data_pred, tf_dict)
@@ -274,7 +219,7 @@ class HFM(object):
 if __name__ == "__main__":
     with tf.device('/gpu:0'):
         batch_size = 10000 
-        layers = [21] + 10*[2*20] + [20] #10*[4*10]
+        layers = [2] + 10*[2*20] + [20] #10*[4*10]
     
         # Load Data
         sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3/"
@@ -292,12 +237,11 @@ if __name__ == "__main__":
             filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
-        t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
+        t_star = np.arange(initial_time, initial_time+numd*inc_time+1, inc_time)*dt # 1xT(=1)
         ###
         #perform coefficient interpolation here, using numpy for it
         total_steps = 20
-        #input_design = [251 + x for x in range(total_steps)]
-        input_times = np.arange(203, 280, 4)*dt
+        infer_times = np.arange(initial_time+2, initial_time+numd*inc_time+3, inc_time)*dt
         noConcernVar = 4
         zone1_i = 689
         zone1_j = 145
@@ -342,7 +286,6 @@ if __name__ == "__main__":
         u_data = UC_star.T.flatten()[:,None]
         v_data = VC_star.T.flatten()[:,None]
         p_data = PC_star.T.flatten()[:,None]
-        print(p_data.shape)
         t_data = T_star.flatten()[:,None]
         x_data = X_star.flatten()[:,None]
         y_data = Y_star.flatten()[:,None]
@@ -366,18 +309,9 @@ if __name__ == "__main__":
         a17_data = A_star[:, 17][:,None]
         a18_data = A_star[:, 18][:,None]
         a19_data = A_star[:, 19][:,None]
-
-        t_pod_eqns =  input_times[:,None]
-        T_eqns = input_times.shape[0]
-        N_eqns = N
-        t_eqns = np.tile(t_pod_eqns, (1,N_eqns)).flatten()[:,None]
-        xy_eqns = np.tile(xydata, (T_eqns,1))
-        x_eqns = xy_eqns[:,0][:,None]
-        y_eqns = xy_eqns[:,1][:,None]
-    
-    
+ 
         # Training
-        model = HFM(l_pod_data, t_pod_data, t_pod_eqns, t_data, x_data, y_data, 
+        model = ROM_DL(l_pod_data, t_pod_data, t_data, x_data, y_data, 
                     d_data, u_data, v_data, p_data, phi, mean_data, 
                     a0_data, a1_data, a2_data, a3_data, a4_data, a5_data,
                     a6_data, a7_data, a8_data, a9_data, a10_data, a11_data,
@@ -387,10 +321,9 @@ if __name__ == "__main__":
 
     
         model.train(total_time = 5, learning_rate=1e-3)
-        #F_D, F_L = model.predict_drag_lift(t_star)
     
         # Test Data
-        t_test = input_times[:,None]
+        t_test = infer_times[:,None]
         l_pod_test = l_pod_data
         # Prediction
         a_pred = model.predict(l_pod_test, t_test)
@@ -410,8 +343,7 @@ if __name__ == "__main__":
             error_d = relative_error(d_pred, DC_star[:,i][:,None])
             error_u = relative_error(u_pred, UC_star[:,i][:,None])
             error_v = relative_error(v_pred, VC_star[:,i][:,None])
-            error_p = relative_error(p_pred - np.mean(p_pred), PC_star[:,i][:,None] - np.mean(PC_star[:,i][:,None]))
-            print('Error d: %e' % (error_d))
+            error_p = relative_error(p_pred, PC_star[:,i][:,None])
             print('Error u: %e' % (error_u))
             print('Error v: %e' % (error_v))
             print('Error p: %e' % (error_p))
