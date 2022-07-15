@@ -39,7 +39,7 @@ def predict_drag_lift(t_sur, x_sur, y_sur, x_sur2, y_sur2, usur_star, vsur_star,
 	T_star = P_star/D_star
 	vis = (Tinf+110.4)/(T_star+110.4)*np.power(T_star/Tinf, 1.5)
 	#print(vis)
-    ### verical and parallel vectors on the aifoil surface 
+	### verical and parallel vectors on the aifoil surface 
 	tck, u = interpolate.splprep([xm,ym],k=3,s=0)
 	out = interpolate.splev(u,tck)
 	der = interpolate.splev(u,tck, der=1)
@@ -52,7 +52,7 @@ def predict_drag_lift(t_sur, x_sur, y_sur, x_sur2, y_sur2, usur_star, vsur_star,
 	dn = np.sqrt(np.square(xm2-xm)+np.square(ym2-ym))
 	dn_star = np.tile(dn, (Tsur,1)).T
 
-    ### integration 
+	### integration 
 	F_D = []
 	F_L = []
 	INT0 = (-P_star[0:Nsur-1,:]*nx_star[0:Nsur-1,:]*0 + vis[0:Nsur-1,:]*Re_inv*(3*(u_sur2[0:Nsur-1,:]-u_sur[0:Nsur-1,:])+(v_sur2[0:Nsur-1,:]-v_sur[0:Nsur-1,:])*(ny_star[0:Nsur-1,:]/nx_star[0:Nsur-1,:]))/dn_star)*ds_star
