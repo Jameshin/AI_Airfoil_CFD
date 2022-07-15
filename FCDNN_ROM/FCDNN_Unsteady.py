@@ -27,11 +27,7 @@ class HFM(object):
     # _star: preditions
     
     def __init__(self, t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data,
-                 d_data, u_data, v_data, p_data, phi, mean_data, a0_data, 
-                 a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, 
-                 a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, 
-                 a14_data, a15_data, a16_data, a17_data,
-                 a18_data, a19_data, t_eqns, x_eqns, y_eqns, l_eqns, 
+                 d_data, u_data, v_data, p_data, 
                  layers, batch_size, Pec, Rey):
         
         # specs
@@ -41,10 +37,7 @@ class HFM(object):
         # flow properties
         self.Pec = Pec
         self.Rey = Rey
-
-        # base space
-        self.phi = phi
-        self.mean_data = mean_data
+     
         noConcernsVar = 4 
         N = x_data.shape[0]
         T = t_pod_data.shape[0]
@@ -193,15 +186,8 @@ if __name__ == "__main__":
         zone1_i = 689
         zone1_j = 145
 
-        #READ IN THE POD DESIGN INFORMATION
-        with open('./designs4.pkl', 'rb') as input:
-            read_times = pickle.load(input)[0]
-        read_times = np.array(read_times)*dt
-        #read in saved rom object
-        with open('./rom-object4.pkl', 'rb') as input:
-            read_rom = pickle.load(input)
         ###        
-        saved_npz = np.load("./array6_R_50_cuttail.npz")
+        saved_npz = np.load("./array4.npz")
         #read xy-coordinates
         #pd_data = pd.read_csv('./xy.csv', dtype='float64', delimiter=' ', header=None, skipinitialspace=True)
         #xydata = pd_data.values
@@ -228,18 +214,6 @@ if __name__ == "__main__":
         idx_x_ff_data = np.append(idx_x_ff_data_i, idx_x_ff_data_o)
         idx_x_ff = np.append(idx_x_bd1, idx_x_ff_data).astype('int32')
 
-        coeffs = np.array(read_rom.coeffsmat)
-        phi = np.array(read_rom.umat)
-        mean_data = np.array(read_rom.mean_data[:,None])
-        #mean_tensor = tf.constant(mean_data, name="mean_data_tensor")
-        #U_pod = np.add(np.transpose(np.matmul(coeffs, np.transpose(phi))), 
-        #                np.tile(mean_data, (1,Ntime)))
-        #for i in range(Ntime):
-        #    temp = U_pod[:,i].reshape(-1, noConcernVar)
-        #    if i ==0:
-        #        U = temp
-        #    else:
-        #        U = np.vstack((U, temp))
         #TC_star = saved_npz['TC']
         #XC_star = saved_npz['XC']
         #YC_star = saved_npz['YC']
@@ -266,7 +240,6 @@ if __name__ == "__main__":
         X_star = np.tile(xydata[:,0], (T,1))
         Y_star = np.tile(xydata[:,1], (T,1))
         L_star = np.tile(label, (T,1))
-        A_star = coeffs.T
         d_data = DC_star.T.flatten()[:,None]
         u_data = UC_star.T.flatten()[:,None]
         v_data = VC_star.T.flatten()[:,None]
@@ -276,26 +249,6 @@ if __name__ == "__main__":
         x_data = X_star.flatten()[:,None]
         y_data = Y_star.flatten()[:,None]
         l_data = L_star.flatten()[:,None]
-        a0_data = A_star[:, 0][:,None]
-        a1_data = A_star[:, 1][:,None]
-        a2_data = A_star[:, 2][:,None]
-        a3_data = A_star[:, 3][:,None]
-        a4_data = A_star[:, 4][:,None]
-        a5_data = A_star[:, 5][:,None]
-        a6_data = A_star[:, 6][:,None]
-        a7_data = A_star[:, 7][:,None]
-        a8_data = A_star[:, 8][:,None]
-        a9_data = A_star[:, 9][:,None]
-        a10_data = A_star[:, 10][:,None]
-        a11_data = A_star[:, 11][:,None]
-        a12_data = A_star[:, 12][:,None]
-        a13_data = A_star[:, 13][:,None]
-        a14_data = A_star[:, 14][:,None]
-        a15_data = A_star[:, 15][:,None]
-        a16_data = A_star[:, 16][:,None]
-        a17_data = A_star[:, 17][:,None]
-        a18_data = A_star[:, 18][:,None]
-        a19_data = A_star[:, 19][:,None]
 
         t_pod_eqns =  input_times[:,None]
         T_eqns = input_times.shape[0]
@@ -311,11 +264,7 @@ if __name__ == "__main__":
     
         # Training
         model = HFM(t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data, 
-                    d_data, u_data, v_data, p_data, phi, mean_data, 
-                    a0_data, a1_data, a2_data, a3_data, a4_data, a5_data,
-                    a6_data, a7_data, a8_data, a9_data, a10_data, a11_data,
-                    a12_data, a13_data, a14_data, a15_data, a16_data, a17_data,
-                    a18_data, a19_data, t_eqns, x_eqns, y_eqns, l_eqns, 
+                    d_data, u_data, v_data, p_data, 
                     layers, batch_size, Pec = 1000, Rey = 10)
 
         model.train(total_time = 40, learning_rate=1e-2)
