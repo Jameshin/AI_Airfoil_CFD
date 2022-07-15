@@ -69,16 +69,13 @@ class DLROM(object):
     
     def train(self, total_time, learning_rate):
         
-        N_data = self.t_data.shape[0]
-        #N_eqns = self.t_eqns.shape[0]
-        
+        N_data = self.x_data.shape[0]        
         start_time = time.time()
         running_time = 0
         it = 0
         while running_time < total_time:
             
             idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
-            #idx_eqns = np.random.choice(N_eqns, min(self.batch_size, N_eqns))
             if it == 50000:
                 learning_rate = 1e-3
             if it == 100000:
