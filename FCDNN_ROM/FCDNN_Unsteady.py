@@ -21,7 +21,7 @@ class DLROM(object):
     # _pred: output of neural network
     # _data: input-output data
     
-    def __init__(self, t_data, x_data, y_data, l_data,
+    def __init__(self, t_data, x_data, y_data,
                  d_data, u_data, v_data, p_data, 
                  layers, batch_size, Pec, Rey):
         
@@ -35,23 +35,23 @@ class DLROM(object):
      
         noConcernsVar = 4 
         N = x_data.shape[0]
-        T = t_pod_data.shape[0]
+        T = t_data.shape[0]
         # data        
-        [self.t_data, self.x_data, self.y_data, self.l_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, l_data, d_data, u_data, v_data, p_data]
+        [self.t_data, self.x_data, self.y_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, d_data, u_data, v_data, p_data]
         
         # placeholders
         [self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
-        [self.t_data_tf, self.x_data_tf, self.y_data_tf, self.l_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
+        [self.t_data_tf, self.x_data_tf, self.y_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(3)]
 
         # neural networks
-        self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, self.l_data, layers = self.layers) #[3,12,12,12,12,12,12,12,4])
+        self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, layers = self.layers) #[3,12,12,12,12,12,12,12,4])
         
         [self.d_data_pred, 
          self.u_data_pred,
          self.v_data_pred,
          self.p_data_pred] = self.net_duvp(self.t_data_tf,
                                            self.x_data_tf,
-                                           self.y_data_tf, self.l_data_tf)   
+                                           self.y_data_tf)   
         
         # loss
         self.loss = mean_squared_error(self.d_data_pred, self.d_data_tf) + \
@@ -97,12 +97,11 @@ class DLROM(object):
                 learning_rate = 1e-8
             (t_data_batch,
              x_data_batch,
-             y_data_batch, l_data_batch,
+             y_data_batch, 
              d_data_batch, u_data_batch, 
              v_data_batch, p_data_batch) = (self.t_data[idx_data,:],
                               self.x_data[idx_data,:],
                               self.y_data[idx_data,:],
-                              self.l_data[idx_data,:],
                               self.d_data[idx_data,:],
                               self.u_data[idx_data,:],
                               self.v_data[idx_data,:],
@@ -112,7 +111,6 @@ class DLROM(object):
             tf_dict = {self.t_data_tf: t_data_batch,
                        self.x_data_tf: x_data_batch,
                        self.y_data_tf: y_data_batch,
-                       self.l_data_tf: l_data_batch,
                        self.u_data_tf: u_data_batch,
                        self.v_data_tf: v_data_batch,
                        self.d_data_tf: d_data_batch,
@@ -151,7 +149,7 @@ class DLROM(object):
 if __name__ == "__main__":
     with tf.device('/gpu:0'):
         batch_size = 40000  #200000
-        layers = [4] + 10*[4*10] + [4]  #[4] + 10*[4*10] + [4]
+        layers = [3] + 10*[4*10] + [4]  #[4] + 10*[4*10] + [4]
     
         # Load Data
         sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3"
@@ -231,16 +229,13 @@ if __name__ == "__main__":
         T_star = np.tile(t_star[:,None], (1,N))
         X_star = np.tile(xydata[:,0], (T,1))
         Y_star = np.tile(xydata[:,1], (T,1))
-        L_star = np.tile(label, (T,1))
         d_data = DC_star.T.flatten()[:,None]
         u_data = UC_star.T.flatten()[:,None]
         v_data = VC_star.T.flatten()[:,None]
         p_data = PC_star.T.flatten()[:,None]
-        print(p_data.shape)
         t_data = T_star.flatten()[:,None]
         x_data = X_star.flatten()[:,None]
         y_data = Y_star.flatten()[:,None]
-        l_data = L_star.flatten()[:,None]
     
         # Training
         model = DLROM(t_data, x_data, y_data, l_data, 
@@ -254,15 +249,13 @@ if __name__ == "__main__":
         T_test = np.tile(t_rom_test, (1,N))
     
         # Write the predictions
-#"""
         for i in range(20):
             t_test = T_test.T[:,i:i+1]
             x_test = X_star.T[:,i:i+1]
             y_test = Y_star.T[:,i:i+1]
-            l_test = L_star.T[:,i:i+1]
             
             # Prediction
-            d_pred, u_pred, v_pred, p_pred = model.predict(t_test, x_test, y_test, l_test)
+            d_pred, u_pred, v_pred, p_pred = model.predict(t_test, x_test, y_test)
             p3d_result = np.hstack((xydata[:,0][:,None], xydata[:,1][:,None], d_pred, u_pred, v_pred, p_pred))
             np.savetxt("./Case_flo8_RANS_NN_cuttail2_t="+str(i)+".dat", p3d_result, delimiter=" ", header="variables = X, Y, c, u, v, p \n zone i="+str(zone1_i-2*cuttail)+" j="+str(glayer)+" ", comments=' ')
             # Error
@@ -271,4 +264,3 @@ if __name__ == "__main__":
             error_v = relative_error(v_pred, VC_star[:,i][:,None])
             error_p = relative_error(p_pred - np.mean(p_pred), PC_star[:,i][:,None] - np.mean(PC_star[:,i][:,None]))
             print('Error d: %e, u: %e, v: %e, p: %e' % (error_d, error_u, error_v, error_p))
-#"""  
