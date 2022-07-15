@@ -21,7 +21,7 @@ class DLROM(object):
     # _pred: output of neural network
     # _data: input-output data
     
-    def __init__(self, t_data, x_data, y_data,
+    def __init__(self, xydata, t_data, x_data, y_data,
                  d_data, u_data, v_data, p_data, 
                  layers, batch_size, Pec, Rey):
         
@@ -37,7 +37,7 @@ class DLROM(object):
         N = x_data.shape[0]
         T = t_data.shape[0]
         # data        
-        [self.t_data, self.x_data, self.y_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, d_data, u_data, v_data, p_data]
+        [self.xydata, self.t_data, self.x_data, self.y_data, self.d_data, self.u_data, self.v_data, self.p_data] = [xydata, t_data, x_data, y_data, d_data, u_data, v_data, p_data]
         
         # placeholders
         [self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
@@ -69,7 +69,7 @@ class DLROM(object):
     
     def train(self, total_time, learning_rate):
         
-        N_data = self.x_data.shape[0]        
+        N_data = self.xydata.shape[0]        
         start_time = time.time()
         running_time = 0
         it = 0
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         y_data = Y_star.flatten()[:,None]
     
         # Training
-        model = DLROM(t_data, x_data, y_data, l_data, 
+        model = DLROM(xydata, t_data, x_data, y_data, l_data, 
                     d_data, u_data, v_data, p_data, 
                     layers, batch_size, Pec = 1000, Rey = 10)
 
@@ -259,5 +259,5 @@ if __name__ == "__main__":
             error_d = relative_error(d_pred, DC_star[:,i][:,None])
             error_u = relative_error(u_pred, UC_star[:,i][:,None])
             error_v = relative_error(v_pred, VC_star[:,i][:,None])
-            error_p = relative_error(p_pred - np.mean(p_pred), PC_star[:,i][:,None] - np.mean(PC_star[:,i][:,None]))
+            error_p = relative_error(p_pred, PC_star[:,i][:,None])
             print('Error d: %e, u: %e, v: %e, p: %e' % (error_d, error_u, error_v, error_p))
