@@ -10,14 +10,12 @@ import time
 import sys
 import os
 import pandas as pd
-import pickle
-import RomObject
 
 from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_error
 
 tf.compat.v1.disable_eager_execution()
 
-class HFM(object):
+class DLROM(object):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
@@ -263,7 +261,7 @@ if __name__ == "__main__":
     
     
         # Training
-        model = HFM(t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data, 
+        model = DLROM(t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data, 
                     d_data, u_data, v_data, p_data, 
                     layers, batch_size, Pec = 1000, Rey = 10)
 
