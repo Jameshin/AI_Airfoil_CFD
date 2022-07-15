@@ -21,7 +21,7 @@ class DLROM(object):
     # _pred: output of neural network
     # _data: input-output data
     
-    def __init__(self, t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data,
+    def __init__(self, t_data, x_data, y_data, l_data,
                  d_data, u_data, v_data, p_data, 
                  layers, batch_size, Pec, Rey):
         
@@ -40,8 +40,8 @@ class DLROM(object):
         [self.t_data, self.x_data, self.y_data, self.l_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, l_data, d_data, u_data, v_data, p_data]
         
         # placeholders
-        [self.t_pod_data_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf, self.a0_data_tf, self.a1_data_tf, self.a2_data_tf, self.a3_data_tf, self.a4_data_tf, self.a5_data_tf, self.a6_data_tf, self.a7_data_tf, self.a8_data_tf, self.a9_data_tf, self.a10_data_tf, self.a11_data_tf, self.a12_data_tf, self.a13_data_tf, self.a14_data_tf, self.a15_data_tf, self.a16_data_tf, self.a17_data_tf, self.a18_data_tf, self.a19_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(25)]
-        [self.t_pod_eqns_tf, self.t_data_tf, self.x_data_tf, self.y_data_tf, self.l_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(5)]
+        [self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
+        [self.t_data_tf, self.x_data_tf, self.y_data_tf, self.l_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
 
         # neural networks
         self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, self.l_data, layers = self.layers) #[3,12,12,12,12,12,12,12,4])
@@ -161,22 +161,19 @@ if __name__ == "__main__":
         filenames = []
         merged = []
         Ntime = 0
-        numd = 50
+        numd = 20
         initial_time = 101
-        inc_time = 2
+        inc_time = 4
         dt = 0.1
-        glayer = 100
-        cuttail = 100
+        glayer = 145
+        cuttail = 0
         for i in range(0, numd):
             filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
-        t_star = np.arange(0, numd*inc_time*dt, inc_time*dt) # 1xT(=1)
+        t_star = np.arange(initial_time, initial_time+numd*inc_time+1, inc_time)*dt # 1xT(=1)
         ###
-        #perform coefficient interpolation here, using numpy for it
-        #total_steps = 200
-        #input_design = [251 + x for x in range(total_steps)]
-        input_times = np.arange(11, 100, 2)*dt
+        input_times = np.arange(initial_time+1, initial_time+numd*inc_time+1, inc_time)*dt
         noConcernVar = 4
         zone1_i = 689
         zone1_j = 145
@@ -190,6 +187,7 @@ if __name__ == "__main__":
         YC_star = saved_npz['YC']
         xydata = np.hstack((XC_star[:,0][:,None], YC_star[:,0][:,None]))
 
+        ### extract airfoil surface nodes
         idx_bottom = np.where(xydata[:,0] == xydata[0,0])[0]        
         for i in range(idx_bottom[1]):
             if(xydata[i,1] != xydata[idx_bottom[1]-i,1]):
@@ -230,7 +228,6 @@ if __name__ == "__main__":
         #    label[idx_sur[i]] = i+2
         #label[idx_x_sur2] = 3
         #label[idx_x_sur3] = 4
-        t_pod_data = read_times[:,None]
         T_star = np.tile(t_star[:,None], (1,N))
         X_star = np.tile(xydata[:,0], (T,1))
         Y_star = np.tile(xydata[:,1], (T,1))
@@ -244,32 +241,18 @@ if __name__ == "__main__":
         x_data = X_star.flatten()[:,None]
         y_data = Y_star.flatten()[:,None]
         l_data = L_star.flatten()[:,None]
-
-        t_pod_eqns =  input_times[:,None]
-        T_eqns = input_times.shape[0]
-        N_eqns = N
-        t_eqns = np.tile(t_pod_eqns, (1,N_eqns)).flatten()[:,None]
-        X_eqns = np.tile(xydata[:,0], (T_eqns,1))
-        Y_eqns = np.tile(xydata[:,1], (T_eqns,1))
-        L_eqns = np.tile(label, (T_eqns,1))
-        x_eqns = X_eqns.flatten()[:,None]
-        y_eqns = Y_eqns.flatten()[:,None]
-        l_eqns = L_eqns.flatten()[:,None]
-    
     
         # Training
-        model = DLROM(t_pod_data, t_pod_eqns, t_data, x_data, y_data, l_data, 
+        model = DLROM(t_data, x_data, y_data, l_data, 
                     d_data, u_data, v_data, p_data, 
                     layers, batch_size, Pec = 1000, Rey = 10)
 
         model.train(total_time = 40, learning_rate=1e-2)
     
         # Test Data
-        t_pod_test = input_times[:,None]
+        t_rom_test = input_times[:,None]
         T_test = np.tile(t_pod_test, (1,N))
     
-        # Prediction
-        #a_pred = model.predict(t_test, x_data, y_data)
         # Write the predictions
 #"""
         for i in range(20):
@@ -277,7 +260,8 @@ if __name__ == "__main__":
             x_test = X_star.T[:,i:i+1]
             y_test = Y_star.T[:,i:i+1]
             l_test = L_star.T[:,i:i+1]
-
+            
+            # Prediction
             d_pred, u_pred, v_pred, p_pred = model.predict(t_test, x_test, y_test, l_test)
             p3d_result = np.hstack((xydata[:,0][:,None], xydata[:,1][:,None], d_pred, u_pred, v_pred, p_pred))
             np.savetxt("./Case_flo8_RANS_NN_cuttail2_t="+str(i)+".dat", p3d_result, delimiter=" ", header="variables = X, Y, c, u, v, p \n zone i="+str(zone1_i-2*cuttail)+" j="+str(glayer)+" ", comments=' ')
