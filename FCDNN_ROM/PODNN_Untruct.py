@@ -159,7 +159,7 @@ if __name__ == "__main__":
         wt = 1000 
         d_inf = 1.225
         U_inf = 0.005*343
-        sim_data_path = "D:\\JupyterNBook\\HFM-master\\Source\\pinn_POD\\2D_uComp\\result_Ma0.4_AOA15\\"
+        sim_data_path = "D:\\JupyterNBook\\Source\\pinn_POD\\2D_uComp\\result_Ma0.4_AOA15\\"
         Tecplot_header_in = "variables =x, y, rho, u, v, p, m"
         Tecplot_header_out = "variables =x, y, rho, u, v, p, m"
         n_xy = zone1_n*2
