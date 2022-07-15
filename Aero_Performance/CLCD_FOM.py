@@ -5,11 +5,6 @@ import pandas as pd
 import os
 from scipy import interpolate
 from itertools import product
-#import tensorflow.compat.v1 as tf
-#from CFDFunctions import Gradient_Velocity_2D, \
-#                      tf_session, mean_squared_error, relative_error
-
-#tf.compat.v1.disable_eager_execution()
 
 def predict_drag_lift(t_sur, x_sur, y_sur, x_sur2, y_sur2, usur_star, vsur_star, psur_star, u_sur2, v_sur2, dsur_star):
 
