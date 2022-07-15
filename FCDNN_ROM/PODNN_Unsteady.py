@@ -107,10 +107,6 @@ class ROM_DLobject):
         self.sess, self.saver = tf_session()
     
     def train(self, total_time, learning_rate):
-        
-        N_data = self.t_pod_dat.shape[0]
-        N_eqns = self.t_pod_eqns.shape[0]
-        
         start_time = time.time()
         running_time = 0
         it = 0
