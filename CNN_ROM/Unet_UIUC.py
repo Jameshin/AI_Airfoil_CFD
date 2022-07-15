@@ -124,10 +124,6 @@ for batch in datasetI.take(1):
 train_inp = np.array(train_inp, dtype="float32")
 print(train_inp.shape)
 
-time_inp = np.arange(0,1200,1) #TC_star[0,:]
-time_test = np.arange(0,1200,1)
-print(time_inp)
-
 datasetO = dataloader(Field_star) #UC_field
 train_env = []
 for batch in datasetO.take(1):
