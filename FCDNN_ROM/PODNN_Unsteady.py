@@ -1,5 +1,6 @@
 #"""
 #@author: Maziar Raissi
+# edited by James Shin
 #"""
 
 import tensorflow.compat.v1 as tf
@@ -12,8 +13,7 @@ import pandas as pd
 import pickle
 import RomObject
 
-from CFDFunctions3 import neural_net, Euler_uIncomp_2D, Gradient_Velocity_2D, \
-                      tf_session, mean_squared_error, relative_error
+from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_error
 
 tf.compat.v1.disable_eager_execution()
 
@@ -107,80 +107,10 @@ class HFM(object):
                                     self.a15_data_tf, self.a16_data_tf,
                                     self.a17_data_tf, self.a18_data_tf,
                                     self.a19_data_tf], axis=1) 
-        # physics "informed" neural networks
-        #[self.u_eqns_pred,
-        # self.v_eqns_pred,
-        # self.p_eqns_pred] = self.net_duvp(self.t_eqns_tf,
-        #                                   self.x_eqns_tf,
-        #                                   self.y_eqns_tf)
 
-        #[self.a0_eqns_pred, self.a1_eqns_pred, self.a2_eqns_pred,
-        # self.a3_eqns_pred, self.a4_eqns_pred,
-        # self.a5_eqns_pred, self.a6_eqns_pred,
-        # self.a7_eqns_pred, self.a8_eqns_pred,
-        # self.a9_eqns_pred, self.a10_eqns_pred,
-        # self.a11_eqns_pred, self.a12_eqns_pred,
-        # self.a13_eqns_pred, self.a14_eqns_pred,
-        # self.a15_eqns_pred, self.a16_eqns_pred,
-        # self.a17_eqns_pred, self.a18_eqns_pred,
-        # self.a19_eqns_pred] = self.net_pod(self.t_pod_eqns_tf)
-
-        #self.a_eqns_pred = tf.concat([self.a0_eqns_pred, self.a1_eqns_pred, 
-        #                              self.a2_eqns_pred,
-        #                             self.a3_eqns_pred, self.a4_eqns_pred,
-        #                             self.a5_eqns_pred, self.a6_eqns_pred,
-        #                             self.a7_eqns_pred, self.a8_eqns_pred,
-        #                             self.a9_eqns_pred, self.a10_eqns_pred,
-        #                             self.a11_eqns_pred, self.a12_eqns_pred,
-        #                             self.a13_eqns_pred, self.a14_eqns_pred,
-        #                             self.a15_eqns_pred, self.a16_eqns_pred,
-        #                             self.a17_eqns_pred, self.a18_eqns_pred,
-        #                             self.a19_eqns_pred], axis=1)
-        '''
-        U_pod_pred = tf.add(tf.transpose(tf.matmul(self.a_data_pred, tf.transpose(tf.constant(phi, tf.float64)))), tf.tile(tf.constant(mean_data, tf.float64), tf.constant([1,T], tf.int32)))
-        for i in range(Ntime):
-            temp = tf.reshape(U_pod_pred[:,i], [-1, noConcernVar])
-            if i == 0:
-                U_pred = temp
-            else:
-                U_pred = tf.concat([U_pred, temp], axis=0)
-        self.d_data_pred = U_pred[:,0][:,None]
-        self.u_data_pred = U_pred[:,1][:,None]
-        self.v_data_pred = U_pred[:,2][:,None]
-        self.p_data_pred = U_pred[:,3][:,None]
-        '''
         
         # loss
-        #u_x = tf.gradients(self.u_data_pred, self.x_data)
-        #v_y = tf.gradients(self.v_data_pred, self.y_data)
-        #e1 = u_x + v_y
-        #self.loss = mean_squared_error(self.a0_data_pred, self.a0_data_tf)+ \
-        #            mean_squared_error(self.a1_data_pred, self.a1_data_tf)+ \
-        #            mean_squared_error(self.a2_data_pred, self.a2_data_tf)+ \
-        #            mean_squared_error(self.a3_data_pred, self.a3_data_tf)+ \
-        #            mean_squared_error(self.a4_data_pred, self.a4_data_tf)+ \
-        #            mean_squared_error(self.a5_data_pred, self.a5_data_tf)+ \
-        #            mean_squared_error(self.a6_data_pred, self.a6_data_tf)+ \
-        #            mean_squared_error(self.a7_data_pred, self.a7_data_tf)+ \
-        #            mean_squared_error(self.a8_data_pred, self.a8_data_tf)+ \
-        #            mean_squared_error(self.a9_data_pred, self.a9_data_tf)+ \
-        #            mean_squared_error(self.a10_data_pred, self.a10_data_tf)+ \
-        #            mean_squared_error(self.a11_data_pred, self.a11_data_tf)+ \
-        #            mean_squared_error(self.a12_data_pred, self.a12_data_tf)+ \
-        #            mean_squared_error(self.a13_data_pred, self.a13_data_tf)+ \
-        #            mean_squared_error(self.a14_data_pred, self.a14_data_tf)+ \
-        #            mean_squared_error(self.a15_data_pred, self.a15_data_tf)+ \
-        #            mean_squared_error(self.a16_data_pred, self.a16_data_tf)+ \
-        #            mean_squared_error(self.a17_data_pred, self.a17_data_tf)+ \
-        #            mean_squared_error(self.a18_data_pred, self.a18_data_tf)+ \
-        self.loss = mean_squared_error(self.a_data_pred, self.a_data_tf) #+ \
-        #self.loss = mean_squared_error(self.d_data_pred, self.d_data_tf) + \
-        #self.loss = mean_squared_error(self.u_data_pred, self.u_data_tf) + \
-        #            mean_squared_error(self.v_data_pred, self.v_data_tf) + \
-        #            mean_squared_error(self.p_data_pred, self.p_data_tf) 
-        #            mean_squared_error(self.e3_eqns_pred, 0.0) + \
-        #            mean_squared_error(self.e3_eqns_pred, 0.0) 
-                    #mean_squared_error(self.e4_eqns_pred, 0.0)
+        self.loss = mean_squared_error(self.a_data_pred, self.a_data_tf) 
         
         # optimizers
         self.global_step = tf. Variable(0, trainable = False, name='global_step')
@@ -389,15 +319,6 @@ if __name__ == "__main__":
         coeffs = np.array(read_rom.coeffsmat)
         phi = np.array(read_rom.umat)
         mean_data = np.array(read_rom.mean_data[:,None])
-        #mean_tensor = tf.constant(mean_data, name="mean_data_tensor")
-        #U_pod = np.add(np.transpose(np.matmul(coeffs, np.transpose(phi))), 
-        #                np.tile(mean_data, (1,Ntime)))
-        #for i in range(Ntime):
-        #    temp = U_pod[:,i].reshape(-1, noConcernVar)
-        #    if i ==0:
-        #        U = temp
-        #    else:
-        #        U = np.vstack((U, temp))
         saved_npz = np.load("./array4.npz")
         #TC_star = saved_npz['TC']
         #XC_star = saved_npz['XC']
