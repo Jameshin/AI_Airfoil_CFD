@@ -179,8 +179,7 @@ if __name__ == "__main__":
         ###
         #perform coefficient interpolation here, using numpy for it
         total_steps = 20
-        #input_design = [251 + x for x in range(total_steps)]
-        input_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
+        infer_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
         noConcernVar = 5
 
         saved_npz = np.load("./array_Unst_21.npz")
@@ -206,10 +205,7 @@ if __name__ == "__main__":
         #label[idx_x_sur] = 1
         #label[idx_x_sur2] = 3
         #label[idx_x_sur3] = 4
-        #t_pod_data = read_times[:,None]
         T_star = np.tile(t_star, (N,1))
-        #X_star = np.tile(xydata[:,0], (T,1))
-        #Y_star = np.tile(xydata[:,1], (T,1))
         L_star = np.tile(label, (T,1))
         d_data = DC_star.T.flatten()[:,None]
         u_data = UC_star.T.flatten()[:,None]
@@ -219,9 +215,6 @@ if __name__ == "__main__":
         x_data = XE_star.T.flatten()[:,None]
         y_data = YE_star.T.flatten()[:,None]
         l_data = L_star.flatten()[:,None]
-        t_pod_eqns =  input_times[:,None]
-        T_eqns = input_times.shape[0]
-        N_eqns = N        
         print(p_data.shape, t_data.shape, x_data.shape)
     
         #sys.stdout = open('stdout.txt', 'w')
@@ -231,12 +224,10 @@ if __name__ == "__main__":
                     layers, batch_size, Pec = 1000, Rey = 10)
 
         model.train(total_time = 1, learning_rate=1e-2)
-
-        #F_D, F_L = model.predict_drag_lift(t_star)
     
         # Test Data
-        t_pod_test = input_times
-        T_test = np.tile(t_pod_test, (N,1))
+        t_rom_test = infer_times
+        T_test = np.tile(t_rom_test, (N,1))
     
         # Prediction
         #a_pred = model.predict(t_test, x_data, y_data)
