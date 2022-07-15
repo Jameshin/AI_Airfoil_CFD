@@ -141,6 +141,7 @@ for batch in datasetT.take(1):
         train_test.insert(i, img_test_np)
 train_test = np.array(train_test, dtype="float32")
 
+# Build CNN network
 input_e = tf.keras.Input(shape=(glayer, zone1_i-2*cuttail-1, 2))
 pooling_size = 2 
 n_ch = 12   #18     
