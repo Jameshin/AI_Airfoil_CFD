@@ -1,5 +1,6 @@
 #"""
-#@author: Maziar Raissi
+#@original author: Maziar Raissi
+# edited by James Shin
 #"""
 
 import tensorflow.compat.v1 as tf
@@ -12,8 +13,7 @@ import pandas as pd
 import pickle
 import RomObject
 
-from CFDFunctions3 import neural_net, Euler_uIncomp_2D, Gradient_Velocity_2D, \
-                      tf_session, mean_squared_error, relative_error
+from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_error
 
 tf.compat.v1.disable_eager_execution()
 
@@ -21,10 +21,7 @@ class HFM(object):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
-    # _eqns: points used to regress the equations
     # _data: input-output data
-    # _inlet: input-output data at the inlet
-    # _star: preditions
     
     def __init__(self, l_pod_data, t_pod_data, t_pod_eqns, t_data, x_data, y_data, 
                  d_data, u_data, v_data, p_data, phi, mean_data,  
@@ -54,22 +51,12 @@ class HFM(object):
         [self.l_pod_data_tf, self.t_pod_data_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf, self.A_star_tf, self.a_star_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(8)]
         [self.t_pod_eqns_tf, self.t_data_tf, self.x_data_tf, self.y_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(4)]
 
-        # physics "uninformed" neural networks
-        self.net_pod= neural_net(self.l_pod_data, self.t_pod_data, layers = self.layers) # 
-        #self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, layers = [3,12,12,12,3])
-        
+        # neural networks
+        self.net_pod= neural_net(self.l_pod_data, self.t_pod_data, layers = self.layers) #         
         
         self.A_star_pred = self.net_pod(self.l_pod_data_tf, self.t_pod_data_tf) # 
                 
-        self.a_data_pred = tf.reshape(self.A_star_pred, [T,T])
-        # physics "informed" neural networks
-        #[self.u_eqns_pred,
-        # self.v_eqns_pred,
-        # self.p_eqns_pred] = self.net_duvp(self.t_eqns_tf,
-        #                                   self.x_eqns_tf,
-        #                                   self.y_eqns_tf)
-
-        
+        self.a_data_pred = tf.reshape(self.A_star_pred, [T,T])        
          
         U_pod_pred = tf.add(tf.transpose(tf.matmul(self.a_data_pred, tf.transpose(tf.constant(phi, tf.float64)))), tf.tile(tf.constant(mean_data, tf.float64), tf.constant([1,T], tf.int32)))
         for i in range(T):
@@ -85,18 +72,10 @@ class HFM(object):
         
         
         # loss
-        #u_x = tf.gradients(self.u_data_pred, self.x_data)
-        #v_y = tf.gradients(self.v_data_pred, self.y_data)
-        #e1 = u_x + v_y
-        #self.loss = mean_squared_error(self.p_data_pred, self.p_data_tf) 
         self.loss = mean_squared_error(self.d_data_pred, self.d_data_tf) + \
                     mean_squared_error(self.u_data_pred, self.u_data_tf) + \
                     mean_squared_error(self.v_data_pred, self.v_data_tf) + \
                     mean_squared_error(self.p_data_pred, self.p_data_tf)
-        #self.loss =  mean_squared_error(self.A_star_pred, self.A_star_tf) 
-        #            mean_squared_error(self.e3_eqns_pred, 0.0) + \
-        #            mean_squared_error(self.e3_eqns_pred, 0.0) 
-                    #mean_squared_error(self.e4_eqns_pred, 0.0)
         
         # optimizers
         self.global_step = tf. Variable(0, trainable = False, name='global_step')
@@ -218,16 +197,8 @@ if __name__ == "__main__":
         coeffs = np.array(read_rom.coeffsmat)
         phi = np.array(read_rom.umat)
         mean_data = np.array(read_rom.mean_data[:,None])
-        #mean_tensor = tf.constant(mean_data, name="mean_data_tensor")
-        #U_pod = np.add(np.transpose(np.matmul(coeffs, np.transpose(phi))), 
-        #                np.tile(mean_data, (1,Ntime)))
-        #for i in range(Ntime):
-        #    temp = U_pod[:,i].reshape(-1, noConcernVar)
-        #    if i ==0:
-        #        U = temp
-        #    else:
-        #        U = np.vstack((U, temp))
         saved_npz = np.load("./array_Unst_21.npz")
+        
         TC_star = saved_npz['TN']
         XC_star = saved_npz['XN']
         YC_star = saved_npz['YN']
