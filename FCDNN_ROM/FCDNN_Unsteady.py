@@ -173,7 +173,7 @@ if __name__ == "__main__":
         #print(Ntime, filenames)
         t_star = np.arange(initial_time, initial_time+numd*inc_time+1, inc_time)*dt # 1xT(=1)
         ###
-        input_times = np.arange(initial_time+1, initial_time+numd*inc_time+2, inc_time)*dt
+        infer_times = np.arange(initial_time+1, initial_time+numd*inc_time+2, inc_time)*dt
         noConcernVar = 4
         zone1_i = 689
         zone1_j = 145
@@ -250,8 +250,8 @@ if __name__ == "__main__":
         model.train(total_time = 40, learning_rate=1e-2)
     
         # Test Data
-        t_rom_test = input_times[:,None]
-        T_test = np.tile(t_pod_test, (1,N))
+        t_rom_test = infer_times[:,None]
+        T_test = np.tile(t_rom_test, (1,N))
     
         # Write the predictions
 #"""
