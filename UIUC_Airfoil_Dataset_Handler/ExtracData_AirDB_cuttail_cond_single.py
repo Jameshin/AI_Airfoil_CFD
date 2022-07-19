@@ -93,12 +93,10 @@ YC_star = np.transpose(YC[:,:,idx_x_slice], (0,1,2))
 CC_star = np.transpose(CC[:,:,idx_x_slice], (0,1,2))
 
 ###
-np.savez("./array_foil_cuttail.npz", CC=CC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
-### check
-#saved = np.load("./array_foil_cuttail.npz")
+np.savez("./array_foil_UIUC_cuttail2064_AOA16.npz", CC=CC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
 print("***run time(sec) :", int(time.time()) - start)
 ### To check flow field
-#saved = np.load("./array_foil_cuttail.npz")
+#saved = np.load("../array_foil_UIUC_cuttail2064_AOA16.npz")
 for i in range(0,2):
     for snap in range(Ncon):
         p3d_result = np.hstack((XC_star[i,snap,:][:,None], YC_star[i,snap,:][:,None], DC_star[i,snap,:][:,None], UC_star[i,snap,:][:,None], VC_star[i,snap,:][:,None], PC_star[i,snap,:][:,None]))
