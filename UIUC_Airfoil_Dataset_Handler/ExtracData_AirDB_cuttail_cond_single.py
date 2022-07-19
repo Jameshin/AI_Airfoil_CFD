@@ -1,8 +1,8 @@
 import numpy as np
-import time
-import sys
 import pandas as pd
-import os
+#import time
+#import sys
+#import os
 
 Nfoil = 1000
 Re = np.array([1.0e5, 2.0e5, 1.0e5])
