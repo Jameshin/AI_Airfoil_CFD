@@ -27,7 +27,7 @@ Nfoil = 1550
 Ncon = 0
 for j in range(Nfoil):
     sim_data_path = './Airfoil_' + str(j+1).rjust(4,'0') + '/'
-    for k in range(2,Re.shape[0]+2):
+    for k in range(2,Re.shape[0]+1):
         for l in range(1,Mach.shape[0]+1):
             for m in range(1,AOA.shape[0]+1):
                 filenames.append(sim_data_path+"result_"+str(k)+"_"+str(l)+"_"+str(m).rjust(2, '0')+"/flo001.dat")
