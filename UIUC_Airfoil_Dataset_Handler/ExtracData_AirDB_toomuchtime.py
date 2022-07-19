@@ -4,7 +4,8 @@ import pandas as pd
 #import sys
 #import os
 
-Re = np.array([1.0e5])
+Nfoil = 1550
+Re = np.array([1.0e5, 2.0e5, 3.0e5])
 Mach = np.array([0.2])
 AOA = np.array([1.0])
 noCol = 11
@@ -14,7 +15,7 @@ glayer = 100
 cuttail = 100 
 d_inf = 1.225
 U_inf = 0.005*343
-sim_dataset_path = "~/AIRFOIL/UIUC_sim/sol_core_1/Airfoil_1/"
+sim_dataset_path = "C:\\Users\\KISTI\\Documents\\Sim\\Data\\UIUC_SimDataset\\"
 res_data_path = "~/DaDri/AirfoilDB/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
@@ -22,23 +23,23 @@ Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
 #os.makedirs(os.path.dirname(res_data_path), exist_ok=True)
 
 # list of file names
-filenames = []
-Nfoil = 1550
-Ncon = 0
+Ncon = Re.shape[0] * Mach.shape[0] * AOA.shape[0]
+Ncase = 0
+foilcases = [] 
 for j in range(Nfoil):
-    sim_data_path = sim_dataset_path + 'Airfoil_' + str(j+1).rjust(4,'0') + '/'
+    sim_data_path = sim_dataset_path + 'Airfoil_' + str(j+1).rjust(4,'0') + '\\'
     for k in range(1,Re.shape[0]+1):
         for l in range(1,Mach.shape[0]+1):
             for m in range(1,AOA.shape[0]+1):
-                filenames.append(sim_data_path+"result_"+str(k)+"_"+str(l)+"_"+str(m).rjust(2, '0')+"/flo001.dat")
-            Ncon += 1
-print(Nfoil, Ncon)
+                foilcases.append(sim_data_path+"result_"+str(k)+"_"+str(l)+"_"+str(m).rjust(2, '0')+"\\flo001.dat")
+                Ncase += 1
+print(Nfoil, Ncon, Ncase)
 ###
 snapshot_data = np.array([]) 
 POD = np.array([])
 pd_data1 = pd.DataFrame([])
-for i in range(Ncon):
-    pd_data1 = pd.read_csv(filenames[i], na_filter=True, dtype='float64', delimiter=' ', skipinitialspace=True, skiprows=2, header=None)
+for i in range(Ncase):
+    pd_data1 = pd.read_csv(foilcases[i], na_filter=True, dtype='float64', delimiter=' ', skipinitialspace=True, skiprows=2, header=None)
     data = np.nan_to_num(pd_data1.values)
     array_data = data.flatten()
     array_data = array_data.reshape(-1,noCol)
@@ -51,52 +52,42 @@ for i in range(Ncon):
         snapshot_data = np.vstack((snapshot_data, array_data))
         #snapshot_pod = array_data[:,[3,4,5,7]].flatten()[:,None]
         #POD = np.hstack((POD,snapshot_pod))
-array_data1 = snapshot_data
-shp = array_data1.shape
+snapshot_dataset = snapshot_data
+shp = snapshot_dataset.shape
 print(shp)
 ###
 con_star = 1+np.arange(Ncon)[:,None] # T(=1) x 1
-#print(POD.shape)
-xc_star = array_data1[:,0] # NT x 1
-yc_star = array_data1[:,1] # NT x 1
-NT = xc_star.shape[0]
-dc_star = array_data1[:,3]
-uc_star = array_data1[:,4]
-vc_star = array_data1[:,5]
-pc_star = array_data1[:,7]
-#print(xc_star.shape) #"X","Y","rh","u","v","w","p","M","vorticity"
+xc_star = snapshot_dataset[:,0] # N x C x 1
+yc_star = snapshot_dataset[:,1] # N x C x 1
+dc_star = snapshot_dataset[:,3]
+uc_star = snapshot_dataset[:,4]
+vc_star = snapshot_dataset[:,5]
+pc_star = snapshot_dataset[:,7]
 #np.savez("./PODarray1.npz", xy=xy, snapshot=POD)
 
-DC = np.reshape(dc_star, (Ncon,N)).T # N x T     
-UC = np.reshape(uc_star, (Ncon,N)).T # N x T
-VC = np.reshape(vc_star, (Ncon,N)).T # N x T
-PC = np.reshape(pc_star, (Ncon,N)).T # N x T
-XC = np.reshape(xc_star, (Ncon,N)).T # N x T
-YC = np.reshape(yc_star, (Ncon,N)).T # N x T
-TC = np.tile(con_star, (1,N)).T # N x T
+DC = np.reshape(dc_star, (Nfoil,Ncon,N)) # Nfoil x T x N     
+UC = np.reshape(uc_star, (Nfoil,Ncon,N)) # 
+VC = np.reshape(vc_star, (Nfoil,Ncon,N)) # 
+PC = np.reshape(pc_star, (Nfoil,Ncon,N)) # 
+XC = np.reshape(xc_star, (Nfoil,Ncon,N)) # 
+YC = np.reshape(yc_star, (Nfoil,Ncon,N)) # 
+CC = np.tile(con_star, (Nfoil,1,N)) # Nfoil x T x N
 
 ####idx_x_slice = np.array([])
-#idx_x_slice = np.array([])
-#for i in range(glayer):
-#    idx_x_slice = np.append(idx_x_slice, np.arange(cuttail+i*zone1_i, (zone1_i-cuttail)+i*zone1_i)).astype('int32')
-#    print(idx_x_slice.shape[0])
-#DC_star = DC[idx_x_slice,:]
-#UC_star = UC[idx_x_slice,:]
-#VC_star = VC[idx_x_slice,:]
-#PC_star = PC[idx_x_slice,:]
-#XC_star = XC[idx_x_slice,:]
-#YC_star = YC[idx_x_slice,:]
-#TC_star = TC[idx_x_slice,:]
+idx_x_slice = np.array([])
+for i in range(glayer):
+    idx_x_slice = np.append(idx_x_slice, np.arange(cuttail+i*zone1_i, (zone1_i-cuttail)+i*zone1_i)).astype('int32')
+    print(idx_x_slice.shape[0])
+DC_star = np.transpose(DC[:,:,idx_x_slice], (0,1,2))
+UC_star = np.transpose(UC[:,:,idx_x_slice], (0,1,2))
+VC_star = np.transpose(VC[:,:,idx_x_slice], (0,1,2))
+PC_star = np.transpose(PC[:,:,idx_x_slice], (0,1,2))
+XC_star = np.transpose(XC[:,:,idx_x_slice], (0,1,2))
+YC_star = np.transpose(YC[:,:,idx_x_slice], (0,1,2))
+CC_star = np.transpose(CC[:,:,idx_x_slice], (0,1,2))
 
-DC_star = DC
-UC_star = UC
-VC_star = VC
-PC_star = PC
-XC_star = XC
-YC_star = YC
-TC_star = TC
 ###
-np.savez("./array_foil2.npz", TC=TC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
+np.savez("./array_foil2.npz", TC=CC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
 ### check
 #saved = np.load("./array1.npz")
 #print(saved['TC'])
