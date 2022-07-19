@@ -16,7 +16,7 @@ dt = 0.1
 wt = 1000 
 d_inf = 1.225
 U_inf = 0.005*343
-sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3/"
+sim_data_path = "./Sim/Data/airfoil_unsteady/sol01_RANS3/"
 res_data_path = "../Data/airfoil_unsteady/results/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
@@ -43,18 +43,19 @@ for i in range(0,numd):
 		snapshot_data = array_data
 		xy = snapshot_data[:,0:2]
 		N = snapshot_data.shape[0]
-		#POD = array_data[:,[3,4,5,7]].flatten()[:,None]
+		POD = array_data[:,[3,4,5,7]].flatten()[:,None]
 	else:
-		snapshot_data = np.vstack((snapshot_data, array_data))
+		#snapshot_data = np.vstack((snapshot_data, array_data))
 		snapshot_pod = array_data[:,[3,4,5,7]].flatten()[:,None]
-		#POD = np.hstack((POD,snapshot_pod))
-array_data1 = snapshot_data
-shp = array_data1.shape
-print(shp)
+		POD = np.hstack((POD,snapshot_pod))
+#array_data1 = snapshot_data
+#shp = array_data1.shape
+#print(shp)
 ###
 t_star = np.arange(Ntime)[:,None]*dt*inc_time # T(=1) x 1
 T = t_star.shape[0]
 print(POD.shape)
+'''
 xc_star = array_data1[:,0] # NT x 1
 yc_star = array_data1[:,1] # NT x 1
 NT = xc_star.shape[0]
@@ -62,9 +63,9 @@ dc_star = array_data1[:,3]
 uc_star = array_data1[:,4]
 vc_star = array_data1[:,5]
 pc_star = array_data1[:,7]
-print(xc_star.shape) #"X","Y","rh","u","v","w","p","M","vorticity"
-#np.savez("./PODarray4.npz", xy=xy, snapshot=POD)
-
+'''
+np.savez("./PODarray.npz", xy=xy, snapshot=POD)
+'''
 DC = np.reshape(dc_star, (T,N)).T # N x T     
 UC = np.reshape(uc_star, (T,N)).T # N x T
 VC = np.reshape(vc_star, (T,N)).T # N x T
@@ -84,16 +85,9 @@ PC_star = PC[idx_x_slice,:]
 XC_star = XC[idx_x_slice,:]
 YC_star = YC[idx_x_slice,:]
 TC_star = TC[idx_x_slice,:]
-
-#DC_star = DC
-#UC_star = UC
-#VC_star = VC
-#PC_star = PC
-#XC_star = XC
-#YC_star = YC
-#TC_star = TC
+'''
 ###
-np.savez("./array5_R_50_cuttail.npz", TC=TC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
+#np.savez("./array5_R_50_cuttail.npz", TC=TC_star, XC=XC_star, YC=YC_star, DC=DC_star, UC=UC_star, VC=VC_star, PC=PC_star)
 ### check
 #saved = np.load("./array.npz")
 #print(saved['TC'])
