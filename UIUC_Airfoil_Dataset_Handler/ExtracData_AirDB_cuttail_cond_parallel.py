@@ -16,11 +16,11 @@ zone1_j = 81
 crop_i = 20
 crop_j = 64
 data_path = "D:\\SimData\\UIUC_ML_2\\CFDdataset\\"
-write_path = "D:\\Kaggle\\"
+write_path = "D:\\Temp\\"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri \n zone i="+str(zone1_i)+" j="+str(zone1_j)+" "
 Tecplot_header_out = "variables = X, Y, rho, u, v, p \n zone i="+str(zone1_i-2*crop_i)+" j="+str(crop_j)+" "
 # create directory if not exist
-#os.makedirs(os.path.dirname(write_data_path), exist_ok=True)
+os.makedirs(os.path.dirname(write_data_path), exist_ok=True)
 
 # list of file names  
 Ncon = Re.shape[0] * Mach.shape[0] * AOA.shape[0]
