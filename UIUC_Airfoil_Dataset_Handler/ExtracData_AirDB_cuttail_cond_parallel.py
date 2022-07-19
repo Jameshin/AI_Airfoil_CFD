@@ -6,10 +6,10 @@ import time
 from multiprocessing import Pool, cpu_count
 from itertools import product
 
-Nfoil = 1000
-Re = np.array([1.0e5]) #, 2.0e5, 1.0e5])
+Nfoil = 1550
+Re = np.array([1.0e5, 2.0e5, 3.0e5])
 Mach = np.array([0.2])
-AOA = np.array([1.0, 2.0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
+AOA = np.array([1.0]) 
 noCol = 11
 zone1_i = 401 
 zone1_j = 81
