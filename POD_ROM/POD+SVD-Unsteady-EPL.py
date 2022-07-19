@@ -16,7 +16,7 @@ zone1_i = 689
 zone1_j = 145
 glayer = 100
 dt = 0.1
-sim_data_path = "~/Data/airfoil_unsteady/" 
+sim_data_path = "C:\\Sim\\AI_Apps\\AI_Airfoil_CFD-main\\" 
 res_data_path = "../Data/airfoil_unsteady/results/"
 Tecplot_header_in = "variables=X, Y, Z, Rho, U, V, W, P, T, Vor, Qcri"
 Tecplot_header_out = "variables=X, Y, Rho, U, V, P"
@@ -29,7 +29,7 @@ with open('times4.pkl', 'wb') as output:
     pickle.dump(times, output, pickle.HIGHEST_PROTOCOL)
 
 #read extracted array
-saved_npz = np.load("./PODarray4.npz")
+saved_npz = np.load(sim_data_path+"PODarray.npz")
 snapshot_data = saved_npz['snapshot']
 shp = snapshot_data.shape
 xy = saved_npz['xy']
