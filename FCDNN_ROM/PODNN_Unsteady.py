@@ -1,3 +1,8 @@
+#"""
+#@original author: Maziar Raissi
+#@edited by James Shin
+#"""
+
 import tensorflow.compat.v1 as tf
 import numpy as np
 import scipy.io
@@ -23,16 +28,11 @@ class PODNN_ROM(object):
                  a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, 
                  a8_data, a9_data, a10_data,
                  a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data,
-                 a18_data, a19_data, layers, batch_size,
-                 Pec, Rey):
+                 a18_data, a19_data, layers, batch_size):
         
         # specs
         self.layers = layers
         self.batch_size = batch_size
-        
-        # flow properties
-        self.Pec = Pec
-        self.Rey = Rey
 
         # base space
         self.phi = phi
@@ -313,8 +313,7 @@ if __name__ == "__main__":
                     a0_data, a1_data, a2_data, a3_data, a4_data, a5_data,
                     a6_data, a7_data, a8_data, a9_data, a10_data, a11_data,
                     a12_data, a13_data, a14_data, a15_data, a16_data, a17_data,
-                    a18_data, a19_data, layers, batch_size,
-                    Pec = 1000, Rey = 10)
+                    a18_data, a19_data, layers, batch_size)
 
     
         model.train(total_time = 5, learning_rate=1e-3)
