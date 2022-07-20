@@ -5,7 +5,7 @@ Framework : Tensorflow 2
 
 ![image](https://user-images.githubusercontent.com/16720947/179875607-ed424ec3-868c-4ce7-acae-17c05b3f3d24.png)
 
-- CNNs main building blocks:
+- CNN에 관한 요약: (참고-http://taewan.kim/post/cnn/)
 1) Input: 전체 변수영역을 Input feature map라고 부름.
 2) Kernel: Input feature map을 돌아다니는 그림자 사각요소. Input과의 연산을 통해 Output feature map을 만듦.
 3) Stride: 커널이 움직이는 간격
@@ -25,4 +25,4 @@ Framework : Tensorflow 2
 
 N.B.: Blue maps are inputs, and cyan maps are outputs.
 
-[참고 - https://github.com/vdumoulin/conv_arithmetic]
+[그림 참고 - https://github.com/vdumoulin/conv_arithmetic]
