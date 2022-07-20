@@ -233,7 +233,7 @@ if __name__ == "__main__":
             filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
-        t_star = np.arange(initial_time, initial_time+numd*inc_time+1, inc_time)*dt # 1xT(=1)
+        t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
         ###
         #perform coefficient interpolation here, using numpy for it
         total_steps = 20
