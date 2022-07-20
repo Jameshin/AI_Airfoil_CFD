@@ -20,7 +20,10 @@ class HFM(object):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
+    # _eqns: points used to regress the equations
     # _data: input-output data
+    # _inlet: input-output data at the inlet
+    # _star: preditions
     
     def __init__(self, t_data, x_data, y_data, l_data,
                  d_data, u_data, v_data, p_data, 
@@ -39,15 +42,18 @@ class HFM(object):
         N = x_data.shape[0]
         T = t_data.shape[0]
         # data
+        #[self.t_pod_data, self.t_pod_eqns, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [t_pod_data, t_pod_eqns, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
         [self.t_data, self.x_data, self.y_data, self.l_data, self.d_data, self.u_data, self.v_data, self.p_data] = [t_data, x_data, y_data, l_data, d_data, u_data, v_data, p_data]
         
         # placeholders
         [self.t_data_tf, self.x_data_tf, self.y_data_tf, self.d_data_tf, self.u_data_tf, self.v_data_tf, self.p_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(7)]
+        #[self.t_pod_eqns_tf, self.t_data_tf, self.x_data_tf, self.y_data_tf, self.l_data_tf] = [tf.placeholder(tf.float64, shape=[None, 1]) for _ in range(5)]
 
-        # neural networks
+        # physics "uninformed" neural networks
         self.net_duvp = neural_net(self.t_data, self.x_data, self.y_data, layers = self.layers) #[3,12,12,12,12,12,12,12,4])
         #print(np.array(self.t_pod_data).shape)
         
+        # physics "informed" neural networks
         [self.d_data_pred, 
          self.u_data_pred,
          self.v_data_pred,
@@ -55,12 +61,38 @@ class HFM(object):
                                            self.x_data_tf,
                                            self.y_data_tf)
 
+        #[self.e1_data_pred,
+        # self.e2_data_pred,
+        # self.e3_data_pred, 
+        '''self.e1_data_pred = Euler_uComp_2D(self.d_data_pred, 
+                                               self.u_data_pred,
+                                               self.v_data_pred,
+                                               self.p_data_pred,
+                                               self.t_data_tf,
+                                               self.x_data_tf,
+                                               self.y_data_tf,
+                                               self.Pec,
+                                               self.Rey)
+        '''
+        # gradients required for the lift and drag forces
+        #[self.u_x_eqns_pred,
+        # self.v_x_eqns_pred,
+        # self.u_y_eqns_pred,
+        # self.v_y_eqns_pred] = Gradient_Velocity_2D(self.u_eqns_pred,
+        #                                            self.v_eqns_pred,
+        #                                            self.x_eqns_tf,
+        #                                            self.y_eqns_tf)
         
         # loss
         self.loss = mean_squared_error(self.d_data_pred, self.d_data_tf) + \
                     mean_squared_error(self.u_data_pred, self.u_data_tf) + \
                     mean_squared_error(self.v_data_pred, self.v_data_tf) + \
-                    mean_squared_error(self.p_data_pred, self.p_data_tf) 
+                    mean_squared_error(self.p_data_pred, self.p_data_tf) #+ \
+                    #mean_squared_error(self.e1_data_pred, 0.0) #+ \
+                    #mean_squared_error(self.e2_data_pred, 0.0) + \
+                    #mean_squared_error(self.e3_data_pred, 0.0) #+ \
+                    #mean_squared_error(self.e4_data_pred, 0.0)
+                    #mean_squared_error(self.p_data_pred-tf.reduce_mean(self.p_data_pred), self.p_data_tf-tf.reduce_mean(self.p_data_tf)) #+ \
         
         # optimizers
         self.global_step = tf. Variable(0, trainable = False, name='global_step')
@@ -179,7 +211,8 @@ if __name__ == "__main__":
         ###
         #perform coefficient interpolation here, using numpy for it
         total_steps = 20
-        infer_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
+        #input_design = [251 + x for x in range(total_steps)]
+        input_times = np.arange(initial_time+inc_time, initial_time+inc_time+numd*inc_time*2, inc_time*2)*dt
         noConcernVar = 5
 
         saved_npz = np.load("./array_Unst_21.npz")
@@ -205,7 +238,10 @@ if __name__ == "__main__":
         #label[idx_x_sur] = 1
         #label[idx_x_sur2] = 3
         #label[idx_x_sur3] = 4
+        #t_pod_data = read_times[:,None]
         T_star = np.tile(t_star, (N,1))
+        #X_star = np.tile(xydata[:,0], (T,1))
+        #Y_star = np.tile(xydata[:,1], (T,1))
         L_star = np.tile(label, (T,1))
         d_data = DC_star.T.flatten()[:,None]
         u_data = UC_star.T.flatten()[:,None]
@@ -215,6 +251,9 @@ if __name__ == "__main__":
         x_data = XE_star.T.flatten()[:,None]
         y_data = YE_star.T.flatten()[:,None]
         l_data = L_star.flatten()[:,None]
+        t_pod_eqns =  input_times[:,None]
+        T_eqns = input_times.shape[0]
+        N_eqns = N        
         print(p_data.shape, t_data.shape, x_data.shape)
     
         #sys.stdout = open('stdout.txt', 'w')
@@ -224,10 +263,12 @@ if __name__ == "__main__":
                     layers, batch_size, Pec = 1000, Rey = 10)
 
         model.train(total_time = 1, learning_rate=1e-2)
+
+        #F_D, F_L = model.predict_drag_lift(t_star)
     
         # Test Data
-        t_rom_test = infer_times
-        T_test = np.tile(t_rom_test, (N,1))
+        t_pod_test = input_times
+        T_test = np.tile(t_pod_test, (N,1))
     
         # Prediction
         #a_pred = model.predict(t_test, x_data, y_data)
@@ -254,3 +295,4 @@ if __name__ == "__main__":
             print('Error d: %e, u: %e, v: %e, p: %e' % (error_d, error_u, error_v, error_p))
         #sys.stdout.close()
 #"""  
+
