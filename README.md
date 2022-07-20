@@ -1,5 +1,5 @@
-# Aerodynamics_Airfoil
-This directory hold sequential and conparative techniques associated with machine learning to examine the aerodynamics of various airfoils in the UIUC airfoil datasite.
+# AI_Airfoil_CFD
+This directory hold sequential and comparative techniques associated with machine learning to examine CFD and aerodynamics of various airfoils in the UIUC airfoil datasite.
 
 - Comparative study of POD, DNN, and their Mixed in the Case of the Eppler387 Airfoil 
 
