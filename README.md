@@ -6,5 +6,4 @@ This directory hold sequential and conparative techniques associated with machin
 ![image](https://user-images.githubusercontent.com/16720947/179479502-5a29d10b-15ac-422d-800d-afe34d083ac1.png)
 
 - Appication of CNN to the 1550 UIUC airfoils 
-
-![image](https://user-images.githubusercontent.com/16720947/179478534-a4119b2f-0211-4562-808a-2b533c4702f4.png)
+![image](https://user-images.githubusercontent.com/16720947/179875485-2062a4ad-1a8b-4abf-8ff4-ff8c57b3200e.png)
