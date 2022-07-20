@@ -13,8 +13,7 @@ import pandas as pd
 import pickle
 import RomObject
 
-from CFDFunctions3 import neural_net, Euler_uIncomp_2D, Gradient_Velocity_2D, \
-                      tf_session, mean_squared_error, relative_error
+from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_error
 
 tf.compat.v1.disable_eager_execution()
 
@@ -34,10 +33,6 @@ class PODNN(object):
         # specs
         self.layers = layers
         self.batch_size = batch_size
-        
-        # flow properties
-        self.Pec = Pec
-        self.Rey = Rey
 
         # base space
         self.phi = phi
@@ -116,7 +111,7 @@ class PODNN(object):
             tf_dict = {self.l_pod_data_tf: self.l_pod_data, 
                        self.t_pod_data_tf: self.t_pod_data,
                        self.A_star_tf: self.A_star, 
-                       self.t_pod_eqns_tf: t_pod_eqns, self.t_data_tf: self.t_data,
+                       self.t_data_tf: self.t_data,
                        self.x_data_tf: self.x_data, self.y_data_tf: self.y_data, 
                        self.u_data_tf: self.u_data, self.v_data_tf: self.v_data,
                        self.d_data_tf: self.d_data, self.p_data_tf: self.p_data,
@@ -151,8 +146,8 @@ class PODNN(object):
     
 if __name__ == "__main__":
     with tf.device('/gpu:0'):
-        batch_size = 10000 
-        layers = [2] + 5*[10*40] + [1]
+        batch_size = 1000
+        layers = [2] + 10*[10*20] + [1]
     
         # Load DatanoCol = 3
         numd = 21
@@ -164,7 +159,7 @@ if __name__ == "__main__":
         wt = 1000 
         d_inf = 1.225
         U_inf = 0.005*343
-        sim_data_path = "D:\\JupyterNBook\\HFM-master\\Source\\pinn_POD\\2D_uComp\\result_Ma0.4_AOA15\\"
+        sim_data_path = "D:\\2D_uComp\\result_Ma0.4_AOA15\\"
         Tecplot_header_in = "variables =x, y, rho, u, v, p, m"
         Tecplot_header_out = "variables =x, y, rho, u, v, p, m"
         n_xy = zone1_n*2
@@ -188,7 +183,7 @@ if __name__ == "__main__":
         noConcernVar = 4
 
         #READ IN THE POD DESIGN INFORMATION
-        with open('./designs.pkl', 'rb') as input:
+        with open('./times.pkl', 'rb') as input:
             read_times = pickle.load(input)[0]
         read_times = np.array(read_times)*dt
         #read in saved rom object
@@ -202,15 +197,6 @@ if __name__ == "__main__":
         coeffs = np.array(read_rom.coeffsmat)
         phi = np.array(read_rom.umat)
         mean_data = np.array(read_rom.mean_data[:,None])
-        #mean_tensor = tf.constant(mean_data, name="mean_data_tensor")
-        #U_pod = np.add(np.transpose(np.matmul(coeffs, np.transpose(phi))), 
-        #                np.tile(mean_data, (1,Ntime)))
-        #for i in range(Ntime):
-        #    temp = U_pod[:,i].reshape(-1, noConcernVar)
-        #    if i ==0:
-        #        U = temp
-        #    else:
-        #        U = np.vstack((U, temp))
         saved_npz = np.load("./array_Unst_21.npz")
         TC_star = saved_npz['TN']
         XC_star = saved_npz['XN']
@@ -254,11 +240,11 @@ if __name__ == "__main__":
     
         #sys.stdout = open('stdout_PODDNN.txt', 'w')
         # Training
-        model = PODNN(l_pod_data, t_pod_data, t_pod_eqns, t_data, x_data, y_data, 
+        model = PODNN(l_pod_data, t_pod_data, t_data, x_data, y_data, 
                     d_data, u_data, v_data, p_data, phi, mean_data, 
                     A_star, layers, batch_size)
     
-        #model.train(total_time = 1, learning_rate=5e-3)
+        model.train(total_time = 1, learning_rate=5e-3)
     
         # Test Data
         t_test = np.repeat(input_times[:,None], T, axis=0)
