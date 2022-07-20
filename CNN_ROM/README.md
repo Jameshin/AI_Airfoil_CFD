@@ -28,4 +28,4 @@ Framework : Tensorflow 2
 
 N.B.: Blue maps are inputs, and cyan maps are outputs.
 
-[그림 참고 - https://github.com/vdumoulin/conv_arithmetic]
+[애니메이션 참고 - https://github.com/vdumoulin/conv_arithmetic]
