@@ -1,6 +1,6 @@
 #"""
 #@original author: Maziar Raissi
-# edited by James Shin
+#@edited by James Shin
 #"""
 
 import tensorflow.compat.v1 as tf
@@ -33,10 +33,10 @@ class DLROM(object):
         self.Pec = Pec
         self.Rey = Rey
      
-        noConcernsVar = 4 
-        N = x_data.shape[0]
-        T = t_data.shape[0]
-        # data        
+        #noConcernsVar = 4 
+        #N = x_data.shape[0]
+        #T = t_data.shape[0]
+        ### data        
         [self.xydata, self.t_data, self.x_data, self.y_data, self.d_data, self.u_data, self.v_data, self.p_data] = [xydata, t_data, x_data, y_data, d_data, u_data, v_data, p_data]
         
         # placeholders
@@ -104,7 +104,6 @@ class DLROM(object):
                               self.v_data[idx_data,:],
                               self.p_data[idx_data,:])
  
-
             tf_dict = {self.t_data_tf: t_data_batch,
                        self.x_data_tf: x_data_batch,
                        self.y_data_tf: y_data_batch,
@@ -149,7 +148,7 @@ if __name__ == "__main__":
         layers = [3] + 10*[4*10] + [4]  #[4] + 10*[4*10] + [4]
     
         # Load Data
-        sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3"
+        sim_data_path = "C:\\Users\\KISTI\\Documents\\Sim\\AI_Apps\\AI_Airfoil_CFD-main\\"
         # create directory if not exist
         #os.makedirs(os.path.dirname(res_data_path), exist_ok=True)
         # list of file names
@@ -166,7 +165,7 @@ if __name__ == "__main__":
             filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
-        t_star = np.arange(initial_time, initial_time+numd*inc_time+1, inc_time)*dt # 1xT(=1)
+        t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
         ###
         infer_times = np.arange(initial_time+1, initial_time+numd*inc_time+2, inc_time)*dt
         noConcernVar = 4
@@ -174,13 +173,12 @@ if __name__ == "__main__":
         zone1_j = 145
 
         ###        
-        saved_npz = np.load("./array4.npz")
+        saved_npz = np.load(sim_data_path+"array4(dataset_20timesteps_RANS_unsteady).npz")
         #read xy-coordinates
-        #pd_data = pd.read_csv('./xy.csv', dtype='float64', delimiter=' ', header=None, skipinitialspace=True)
-        #xydata = pd_data.values
         XC_star = saved_npz['XC']
         YC_star = saved_npz['YC']
         xydata = np.hstack((XC_star[:,0][:,None], YC_star[:,0][:,None]))
+        print(XC_star.shape)
 
         ### extract airfoil surface nodes
         idx_bottom = np.where(xydata[:,0] == xydata[0,0])[0]        
@@ -217,8 +215,8 @@ if __name__ == "__main__":
         T = Ntime
         N = xydata.shape[0]
         label = np.zeros(N)
-        label[idx_x_ff] = 3
-        label[idx_x_sur] = 1
+        #label[idx_x_ff] = 3
+        #label[idx_x_sur] = 1
         #for i in range(1):
         #    label[idx_sur[i]] = i+2
         #label[idx_x_sur2] = 3
@@ -233,9 +231,9 @@ if __name__ == "__main__":
         t_data = T_star.flatten()[:,None]
         x_data = X_star.flatten()[:,None]
         y_data = Y_star.flatten()[:,None]
-    
+        print(t_data.shape, x_data.shape, y_data.shape)
         # Training
-        model = DLROM(xydata, t_data, x_data, y_data, l_data, 
+        model = DLROM(xydata, t_data, x_data, y_data,  
                     d_data, u_data, v_data, p_data, 
                     layers, batch_size, Pec = 1000, Rey = 10)
 
