@@ -12,13 +12,14 @@ from tensorflow.keras.models import Model
 from CFDLib import mean_squared_error, relative_error
 
 # Data path
-DATA_PATH = "C:\\SimData\\UIUC_ML\\array_foil_UIUC_cuttail0064.npz"
+sim_data_path = "C:\\Sim\\Data\\UIUC_SimDataset\\"
+DATA_PATH = "C:\\Sim\\AI_Apps\\AI_Airfoil_CFD-main\\array_foil_UIUC_cuttail2064_AOA16.npz"
 
 noConcernVar = 4
 zone1_i = 401
 zone1_j = 81
-glayer = 64 #zone1_j
-cuttail = 0
+glayer = 64 # = crop_j
+cuttail = 20 # = crop_i
 
 # Model parameters
 BATCH_SIZE = 1530
@@ -38,7 +39,7 @@ Nfoil = 1550
 numd = Nfoil*Re.shape[0]*Mach.shape[0]*AOA.shape[0]
 Ncon = 0
 for j in range(Nfoil):
-    sim_data_path = data_path + 'Airfoil_' + str(j+1).rjust(4,'0') + '/'
+    sim_data_path = sim_data_path + 'Airfoil_' + str(j+1).rjust(4,'0') + '/'
     for k in range(1,Re.shape[0]+1):
         for l in range(1,Mach.shape[0]+1):
             for m in range(1,AOA.shape[0]+1):
@@ -52,9 +53,11 @@ saved_npz = np.load(DATA_PATH)
 XC_star = saved_npz['XC']
 YC_star = saved_npz['YC']
 xydata = np.hstack((XC_star[:,0][:,None], YC_star[:,0][:,None]))
+print(XC_star.shape)
 
 #Shape vector
-idx_bottom = np.where(xydata[:,0] == xydata[1,0])[0]        
+idx_bottom = np.where(xydata[:,0] == xydata[1,0])[0]     
+i = 1
 for i in range(1,idx_bottom[1]):
     if(xydata[i,1] != xydata[idx_bottom[1]-i+1,1]):
         break
@@ -69,7 +72,7 @@ idx_x_ff_data_o = np.arange((glayer)*(zone1_i-2*cuttail-1), zone1_i-2*cuttail-1+
 idx_x_ff_data_i = np.append(idx_x_ff_data_i1, idx_x_ff_data_i2)
 idx_x_ff_data = np.append(idx_x_ff_data_i, idx_x_ff_data_o)
 idx_x_ff = np.append([], idx_x_ff_data).astype('int32') 
-T = Ntime
+T = Nfoil
 N = xydata.shape[0]
 print(idx_x_sur)
 
@@ -82,28 +85,26 @@ VC_star = saved_npz['VC']
 PC_star = saved_npz['PC']
 
 XI_star = np.reshape(XC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-XI_field = XI_star[:,:,:-1] #,np.newaxis
+XI_field = XI_star[:,:,:-1] 
 YI_star = np.reshape(YC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-YI_field = YI_star[:,:,:-1] #,np.newaxis
+YI_field = YI_star[:,:,:-1] 
 XT_star = np.reshape(XC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
-XT_field = XT_star[:,:,:-1] #,np.newaxis
-YT_star = np.reshape(YC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:] #BATCH_SIZE:numd
-YT_field = YT_star[:,:,:-1] #,np.newaxis
+XT_field = XT_star[:,:,:-1] 
+YT_star = np.reshape(YC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:] 
+YT_field = YT_star[:,:,:-1] 
 UI_star = np.reshape(UC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-UC_field = UI_star[:,:,:-1] #,np.newaxis
+UC_field = UI_star[:,:,:-1] 
 VI_star = np.reshape(VC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-VC_field = VI_star[:,:,:-1] #,np.newaxis
+VC_field = VI_star[:,:,:-1] 
 PI_star = np.reshape(PC_star.T, [numd, glayer, zone1_i-2*cuttail])[0:BATCH_SIZE,:,:]
-PC_field = PI_star[:,:,:-1] #,np.newaxis
+PC_field = PI_star[:,:,:-1] 
 UT_star = np.reshape(UC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
-UT_field = UT_star[:,:,:-1] #,np.newaxis
+UT_field = UT_star[:,:,:-1] 
 VT_star = np.reshape(VC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
-VT_field = VT_star[:,:,:-1] #,np.newaxis
+VT_field = VT_star[:,:,:-1] 
 PT_star = np.reshape(PC_star.T, [numd, glayer, zone1_i-2*cuttail])[BATCH_SIZE:numd,:,:]
-PT_field = PT_star[:,:,:-1] #,np.newaxis
+PT_field = PT_star[:,:,:-1] 
 
-#XC_field = np.reshape(XC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
-#YC_field = np.reshape(YC_star, [numd, glayer-1, zone1_i-2*cuttail-1])[0:BATCH_SIZE,:,:]
 Input_field = np.stack([XI_field, YI_field], axis=3) #XC_field, YC_field,
 Test_field = np.stack([XT_field, YT_field], axis=3)
 Field_star = np.stack([UC_field, VC_field, PC_field], axis=3) #, VC_field, PC_field
