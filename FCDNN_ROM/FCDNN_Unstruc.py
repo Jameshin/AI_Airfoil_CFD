@@ -65,8 +65,7 @@ class DNN_Unstruc(object):
     
     def train(self, total_time, learning_rate):
         
-        N_data = self.t_data.shape[0]
-        #N_eqns = self.t_eqns.shape[0]
+        N_data = self.x_data.shape[0]
         
         start_time = time.time()
         running_time = 0
