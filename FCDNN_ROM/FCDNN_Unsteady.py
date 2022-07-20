@@ -23,15 +23,11 @@ class DLROM(object):
     
     def __init__(self, xydata, t_data, x_data, y_data,
                  d_data, u_data, v_data, p_data, 
-                 layers, batch_size, Pec, Rey):
+                 layers, batch_size):
         
         # specs
         self.layers = layers
         self.batch_size = batch_size
-        
-        # flow properties
-        self.Pec = Pec
-        self.Rey = Rey
      
         #noConcernsVar = 4 
         #N = x_data.shape[0]
@@ -148,6 +144,7 @@ if __name__ == "__main__":
         layers = [3] + 10*[4*10] + [4]  #[4] + 10*[4*10] + [4]
     
         # Load Data
+        data_path = "C:\\Users\\KISTI\\Documents\\Sim\\Data\\"
         sim_data_path = "C:\\Users\\KISTI\\Documents\\Sim\\AI_Apps\\AI_Airfoil_CFD-main\\"
         # create directory if not exist
         #os.makedirs(os.path.dirname(res_data_path), exist_ok=True)
@@ -162,7 +159,7 @@ if __name__ == "__main__":
         glayer = 145
         cuttail = 0
         for i in range(0, numd):
-            filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
+            filenames.append(data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
         t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
@@ -235,7 +232,7 @@ if __name__ == "__main__":
         # Training
         model = DLROM(xydata, t_data, x_data, y_data,  
                     d_data, u_data, v_data, p_data, 
-                    layers, batch_size, Pec = 1000, Rey = 10)
+                    layers, batch_size)
 
         model.train(total_time = 40, learning_rate=1e-2)
     
