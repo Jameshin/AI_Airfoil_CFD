@@ -12,7 +12,7 @@ from CFDFunctions3 import neural_net, tf_session, mean_squared_error, relative_e
 
 tf.compat.v1.disable_eager_execution()
 
-class ROM_DLobject):
+class PODNN_ROM(object):
     # notational conventions
     # _tf: placeholders for input/output data and points used to regress the equations
     # _pred: output of neural network
@@ -23,7 +23,7 @@ class ROM_DLobject):
                  a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, 
                  a8_data, a9_data, a10_data,
                  a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data,
-                 a18_data, a19_data, t_eqns, x_eqns, y_eqns, layers, batch_size,
+                 a18_data, a19_data, layers, batch_size,
                  Pec, Rey):
         
         # specs
@@ -41,7 +41,7 @@ class ROM_DLobject):
         N = x_data.shape[0]
         T = t_pod_data.shape[0]
         # data
-        [self.l_pod_data_tf, self.t_pod_dat, self.d_data, self.u_data, self.v_data, self.p_data, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [l_pod_data, t_pod_data, d_data, u_data, v_data, p_data, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
+        [self.l_pod_data, self.t_pod_data, self.d_data, self.u_data, self.v_data, self.p_data, self.a0_data, self.a1_data, self.a2_data, self.a3_data, self.a4_data, self.a5_data, self.a6_data, self.a7_data, self.a8_data, self.a9_data, self.a10_data, self.a11_data, self.a12_data, self.a13_data, self.a14_data, self.a15_data, self.a16_data, self.a17_data, self.a18_data, self.a19_data] = [l_pod_data, t_pod_data, d_data, u_data, v_data, p_data, a0_data, a1_data, a2_data, a3_data, a4_data, a5_data, a6_data, a7_data, a8_data, a9_data, a10_data, a11_data, a12_data, a13_data, a14_data, a15_data, a16_data, a17_data, a18_data, a19_data]
         [self.t_data, self.x_data, self.y_data] = [t_data, x_data, y_data]
         self.a_data = tf.concat([self.a0_data, self.a1_data,
                                     self.a2_data,
@@ -69,7 +69,7 @@ class ROM_DLobject):
          self.a13_data_pred, self.a14_data_pred,
          self.a15_data_pred, self.a16_data_pred,
          self.a17_data_pred, self.a18_data_pred, 
-         self.a19_data_pred] = self.net_pod(self.l_pod_data, self.t_pod_data_tf)
+         self.a19_data_pred] = self.net_pod(self.l_pod_data_tf, self.t_pod_data_tf)
                 
         self.a_data_pred = tf.concat([self.a0_data_pred, self.a1_data_pred, 
                                      self.a2_data_pred,
@@ -218,7 +218,8 @@ if __name__ == "__main__":
         layers = [2] + 10*[2*20] + [20] #10*[4*10]
     
         # Load Data
-        sim_data_path = "~/AIRFOIL/Unsteady/Eppler387/sol01_RANS3/"
+        data_path = "C:\\Users\\KISTI\\Documents\\Sim\\Data\\"
+        sim_data_path = "C:\\Users\\KISTI\\Documents\\Sim\\AI_Apps\\AI_Airfoil_CFD-main\\"
         # create directory if not exist
         #os.makedirs(os.path.dirname(res_data_path), exist_ok=True)
         # list of file names
@@ -226,11 +227,11 @@ if __name__ == "__main__":
         merged = []
         Ntime = 0
         numd = 20
-        initial_time = 201
+        initial_time = 101
         inc_time = 4
         dt = 0.1
         for i in range(0, numd):
-            filenames.append(sim_data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
+            filenames.append(data_path+"flo001.0000"+str(initial_time+i*inc_time).rjust(3,'0')+"uns")
             Ntime += 1
         #print(Ntime, filenames)
         t_star = np.arange(initial_time, initial_time+numd*inc_time, inc_time)*dt # 1xT(=1)
@@ -243,7 +244,7 @@ if __name__ == "__main__":
         zone1_j = 145
 
         #READ IN THE POD DESIGN INFORMATION
-        with open('./designs4.pkl', 'rb') as input:
+        with open('./times4.pkl', 'rb') as input:
             read_times = pickle.load(input)[0]
         read_times = np.array(read_times)*dt
         #read in saved rom object
@@ -257,7 +258,7 @@ if __name__ == "__main__":
         coeffs = np.array(read_rom.coeffsmat)
         phi = np.array(read_rom.umat)
         mean_data = np.array(read_rom.mean_data[:,None])
-        saved_npz = np.load("./array4.npz")
+        saved_npz = np.load(sim_data_path+"array4(dataset_20timesteps_RANS_unsteady).npz")
         #TC_star = saved_npz['TC']
         #XC_star = saved_npz['XC']
         #YC_star = saved_npz['YC']
@@ -307,12 +308,12 @@ if __name__ == "__main__":
         a19_data = A_star[:, 19][:,None]
  
         # Training
-        model = ROM_DL(l_pod_data, t_pod_data, t_data, x_data, y_data, 
+        model = PODNN_ROM(l_pod_data, t_pod_data, t_data, x_data, y_data, 
                     d_data, u_data, v_data, p_data, phi, mean_data, 
                     a0_data, a1_data, a2_data, a3_data, a4_data, a5_data,
                     a6_data, a7_data, a8_data, a9_data, a10_data, a11_data,
                     a12_data, a13_data, a14_data, a15_data, a16_data, a17_data,
-                    a18_data, a19_data, t_eqns, x_eqns, y_eqns, layers, batch_size,
+                    a18_data, a19_data, layers, batch_size,
                     Pec = 1000, Rey = 10)
 
     
