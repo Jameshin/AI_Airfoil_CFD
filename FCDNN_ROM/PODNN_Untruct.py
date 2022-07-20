@@ -2,9 +2,6 @@
 #@original author: Maziar Raissi
 # edited by James Shin
 #"""
-#"""
-#@author: Maziar Raissi
-#"""
 
 import tensorflow.compat.v1 as tf
 import numpy as np
