@@ -16,5 +16,5 @@ Framework : Tensorflow 2
 
 The size of the output will be equal to the number of steps made, plus one, accounting for the initial position of the kernel, considering that the kernel starts on the leftmost part of the input feature map and slides by steps of one until it touches the right side of the input with stride 1 and without padding.
 
-![image](https://user-images.githubusercontent.com/16720947/179882632-0e195756-f627-4898-92ad-2bdfc4e2c60e.png)
+![image](https://github.com/vdumoulin/conv_arithmetic/blob/master/gif/no_padding_no_strides.gif?raw=true)
 
