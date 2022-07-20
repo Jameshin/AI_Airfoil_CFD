@@ -148,10 +148,6 @@ if __name__ == "__main__":
     y_sur = single_data[:,1][idx_x_sur]
     x_sur2 = single_data[:,0][idx_x_sur2]
     y_sur2 = single_data[:,1][idx_x_sur2]
-    print(t_sur,x_sur)
-    #t_sur = TC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
-    #x_sur = XC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
-    #y_sur = YC_star[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None]
     u_sur = UC[idx_xc_bd,:][:, idx_t_bd]#.flatten()[:,None]
     v_sur = VC[idx_xc_bd,:][:, idx_t_bd]#.flatten()[:,None]
     p_sur = PC[idx_xc_bd,:][:, idx_t_bd].flatten()[:,None] 
@@ -161,5 +157,4 @@ if __name__ == "__main__":
 
     F_L, F_D = predict_drag_lift(t_sur, x_sur, y_sur, x_sur2, y_sur2, u_sur, v_sur, p_sur, u_sur2, v_sur2, d_sur)
     result = np.hstack((F_L[:,None], F_D[:,None]))
-    #np.savetxt(sim_data_path+"PINN_CLCD_RANS8_NN.dat", result, delimiter=" ", header="variables = CL, CD")
-    np.savetxt(sim_data_path+"FOM_CLCD_RANS3_dt4.dat", result, delimiter=" ", header="variables = CL, CD")
+    np.savetxt(sim_data_path+"FOM_CLCD.dat", result, delimiter=" ", header="variables = CL, CD")
