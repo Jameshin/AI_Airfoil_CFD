@@ -15,12 +15,14 @@ Framework : Tensorflow 2
 ![image](https://user-images.githubusercontent.com/16720947/179882532-e189f4e2-c4dd-461a-9879-2f3050e76031.png)
 
 - Convolution
-N.B.: Blue maps are inputs, and cyan maps are outputs. 
+ 
 ![Convolution_arithmetic_-_No_padding_no_strides](https://user-images.githubusercontent.com/16720947/179883147-a1cd71f7-13f0-4266-8e59-e8bc44c7edcc.gif)
 
 - Deconvolution
 
-N.B.: Blue maps are inputs, and cyan maps are outputs.
+
 ![YyCu2](https://user-images.githubusercontent.com/16720947/179883158-9fb7a660-fda8-42d9-8eec-bf1b90b87dc6.gif)
+
+N.B.: Blue maps are inputs, and cyan maps are outputs.
 
 [참고 - https://github.com/vdumoulin/conv_arithmetic]
