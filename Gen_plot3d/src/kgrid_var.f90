@@ -7,7 +7,4 @@ module kgrid_var
       real(kind=8),allocatable,dimension(:,:,:) :: Z
       real(kind=8) :: dis_first,dis_ratio,dc,cf
 
-!     character(len=50) :: airname
-
-!     -----------------------------------------------------------------
 end module
