@@ -1,3 +1,6 @@
+c---- created by Jeonghwan Sa
+c---- edited by James Shin
+
       program kgrid
       use kgrid_var
       implicit none
@@ -98,11 +101,6 @@ c        R(i,2,1) = (1.0d0-alpha)*R0(i,2,1) +
 c    +        alpha*(lm*R0(i+1,2,1)+lp*R0(i-1,2,1))/(lp+lm)
 c     end do
 c     end do
-
-
-
-
-
 
       return
       end
