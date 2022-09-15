@@ -65,7 +65,7 @@ class DLROM(object):
     
     def train(self, total_time, learning_rate):
         
-        N_data = self.xydata.shape[0]        
+        N_data = self.t_data.shape[0]        
         start_time = time.time()
         running_time = 0
         it = 0
@@ -140,7 +140,7 @@ class DLROM(object):
   
 if __name__ == "__main__":
     with tf.device('/gpu:0'):
-        batch_size = 40000  #200000
+        batch_size = 100000  #200000
         layers = [3] + 10*[4*10] + [4]  #[4] + 10*[4*10] + [4]
     
         # Load Data
