@@ -12,6 +12,6 @@ This directory hold sequential and comparative techniques associated with machin
 Shin, J. H. and Sa, J. H, "UIUC airfoil dataset, Grid, aerodynamics, computational fluid dynamics, Simulation, dataon, http://doi.org/10.22711/idr/952, 2022.
   
 
-- Related Literature :
+- Related Literature
 1. Shin, J. H., Utilizing Data/AI Library for CFD: A Case of Airfoi Aerodynamics, 12th CFD Short Course of Korean Society for Computational Fluid Engineering, 2022. 
 2. Shin, J.-H., Cho, K.-W. Comparative study on reduced models of unsteady aerodynamics using proper orthogonal decomposition and deep neural network. Journal of Mechanical Science and Technology 36 (9) (2022) 4491~4499. http://doi.org/10.1007/s12206-022-0813-3
