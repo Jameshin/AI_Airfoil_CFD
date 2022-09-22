@@ -12,4 +12,5 @@ This directory hold sequential and comparative techniques associated with machin
   : https://dataon.kisti.re.kr/search/view.do?mode=view&svcId=9ea6683a346f59a9e3391ad6473f67d6
 
 - Related Literature
+
 Shin, J.-H., Cho, K.-W. (2022). Comparative study on reduced models of unsteady aerodynamics using proper orthogonal decomposition and deep neural network. Journal of Mechanical Science and Technology 36 (9) (2022) 4491~4499. http://doi.org/10.1007/s12206-022-0813-3
