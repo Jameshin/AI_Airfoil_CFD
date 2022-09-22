@@ -11,7 +11,7 @@ This directory hold sequential and comparative techniques associated with machin
 - Data repository : https://dataon.kisti.re.kr/search/view.do?mode=view&svcId=9ea6683a346f59a9e3391ad6473f67d6 
 1. Shin, J. H. and Sa, J. H, "UIUC airfoil dataset, Grid, aerodynamics, computational fluid dynamics, Simulation, dataon, http://doi.org/10.22711/idr/952, 2022.
   
-
+-------------------------------------------------------------------------------
 
 - Related Literature
 1. Shin, J. H., Utilizing Data/AI Library for CFD: A Case of Airfoi Aerodynamics, 12th CFD Short Course of Korean Society for Computational Fluid Engineering, 2022. 
