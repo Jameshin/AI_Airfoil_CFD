@@ -9,6 +9,7 @@ This directory hold sequential and comparative techniques associated with machin
 ![image](https://user-images.githubusercontent.com/16720947/179875485-2062a4ad-1a8b-4abf-8ff4-ff8c57b3200e.png)
 
 - Data repository : https://dataon.kisti.re.kr/search/view.do?mode=view&svcId=9ea6683a346f59a9e3391ad6473f67d6 
+
 Shin, J. H. and Sa, J. H, "UIUC airfoil dataset, Grid, aerodynamics, computational fluid dynamics, Simulation, dataon, http://doi.org/10.22711/idr/952, 2022.
   
 
