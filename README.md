@@ -1,6 +1,7 @@
 # AI_Airfoil_CFD 
-This repository hold sequential and comparative techniques associated with machine learning to examine CFD and aerodynamics of a bunch of airfoils in the UIUC airfoil datasite.
-The codes have been modified and added for creating a technical report by researchers @ GIST (Prof. Seongim Choi, Wontae Hwang, Suhun Cho) 
+This repository hold comparative techniques associated with machine learning to examine CFD and aerodynamics of a bunch of airfoils in the UIUC airfoil datasite.
+The codes have been modified and added for creating a technical report by researchers @ GIST (Prof. Seongim Choi, Wontae Hwang, Suhun Cho).
+Check them in the AI-CFD-Technical-Report repository.
 
 -------------------------------------------------------------------------------
 
