@@ -1,5 +1,5 @@
 # AI_Airfoil_CFD 
-This repository hold comparative techniques associated with machine learning to examine CFD and aerodynamics of a bunch of airfoils in the UIUC airfoil datasite.
+This repository hold comparative techniques associated with machine learning to examine CFD and aerodynamics of a bunch of airfoils in the UIUC airfoil datasite. The codes were initially released in the short course of KSCFE 2022.
 The codes have been modified and added for creating a technical report by researchers @ GIST (Prof. Seongim Choi, Wontae Hwang, Suhun Cho).
 Please check them in the AI-CFD-Technical-Report repository (https://github.com/Jameshin/AI-CFD-Technical-Report).
 
