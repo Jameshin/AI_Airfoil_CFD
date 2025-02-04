@@ -22,3 +22,4 @@ Please check them in the AI-CFD-Technical-Report repository (https://github.com/
 - Related Literature
 1. Shin, J. H., Utilizing Data/AI Libraries for CFD: A Case of Airfoil Aerodynamics, 12th CFD Short Course of Korean Society for Computational Fluid Engineering, 2022. (in Korean) 
 2. Shin, J.-H., Cho, K.-W. Comparative study on reduced models of unsteady aerodynamics using proper orthogonal decomposition and deep neural network. Journal of Mechanical Science and Technology 36 (9) (2022) 4491~4499. http://doi.org/10.1007/s12206-022-0813-3
+3. Shin, J. H., Park, S. J., Kim, M. A., Lee, M. J., Lim, S. C., & Cho, K. W. Development of a digital twin pipeline for interactive scientific simulation and mixed reality visualization. IEEE Access 11, 100907~100918 (2023) doi: 10.1109/ACCESS.2023.3314793
